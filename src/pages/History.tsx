@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -11,29 +11,46 @@ import { BookOpen, CalendarClock, Clock, Download, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Enrollment, EnrollmentStatus } from "@/types";
+import { Enrollment, EnrollmentStatus, Course } from "@/types";
+
+// Extend the Enrollment type locally to include course details
+interface EnrollmentWithCourse extends Enrollment {
+  course: Course;
+}
 
 export default function History() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [enrollments, setEnrollments] = useState<EnrollmentWithCourse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading past enrollments
-  useState(() => {
+  // Fetch past enrollments
+  useEffect(() => {
     if (user) {
       setIsLoading(true);
       // Fetch user's enrollments
       const fetchEnrollments = async () => {
         try {
           const userEnrollments = await mockService.getEnrollmentsByUserId(user.id);
-          // Filter to only show completed courses
+          // Filter to only show completed or cancelled courses
           const completedEnrollments = userEnrollments.filter(
             enrollment => 
               enrollment.status === EnrollmentStatus.COMPLETED || 
-              enrollment.status === EnrollmentStatus.CANCELED
+              enrollment.status === EnrollmentStatus.CANCELLED
           );
-          setEnrollments(completedEnrollments);
+          
+          // Fetch course details for each enrollment
+          const enrollmentsWithCourses = await Promise.all(
+            completedEnrollments.map(async (enrollment) => {
+              const course = await mockService.getCourseById(enrollment.courseId);
+              return { 
+                ...enrollment, 
+                course 
+              } as EnrollmentWithCourse;
+            })
+          );
+          
+          setEnrollments(enrollmentsWithCourses);
         } catch (error) {
           console.error("Error fetching enrollment history:", error);
         } finally {
