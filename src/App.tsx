@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
 import Notifications from "./pages/Notifications";
 import Ratings from "./pages/Ratings";
+import Statistics from "./pages/admin/Statistics";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/courses" element={<CoursesAdmin />} />
+            <Route path="/admin/statistics" element={<Statistics />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/notifications" element={<Notifications />} />
