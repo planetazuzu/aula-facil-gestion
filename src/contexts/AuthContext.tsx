@@ -3,6 +3,7 @@ import { User, UserRole, NotificationPreference } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { mockUsers, userService } from "@/lib/mock/users";
 
 interface AuthContextType {
   user: User | null;
@@ -42,11 +43,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Flag to determine if we should use mock authentication
+  const useMockAuth = true; // Set to true to use mock users instead of Supabase
 
   useEffect(() => {
     // Check if user is already authenticated
     const initAuth = async () => {
       try {
+        if (useMockAuth) {
+          // For mock auth, check localStorage
+          const storedUser = localStorage.getItem('mockUser');
+          if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+          }
+          setIsLoading(false);
+          return;
+        }
+        
+        // Real Supabase authentication
         const { data } = await supabase.auth.getSession();
         
         if (data.session) {
@@ -73,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } catch (error) {
-        console.error("Error initializing Supabase auth:", error);
+        console.error("Error initializing auth:", error);
       } finally {
         setIsLoading(false);
       }
@@ -81,45 +97,64 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initAuth();
 
-    // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        // User signed in, get their profile
-        const { data: profileData, error } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-          
-        if (profileData && !error) {
-          const userData: User = {
-            id: session.user.id,
-            email: profileData.email,
-            name: profileData.name,
-            role: profileData.role as UserRole,
-            notificationPreference: profileData.notification_preference as NotificationPreference,
-            phone: profileData.phone,
-            createdAt: new Date(profileData.created_at),
-            updatedAt: new Date(profileData.updated_at)
-          };
-          setUser(userData);
+    // Set up auth state listener only for real Supabase auth
+    if (!useMockAuth) {
+      const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          // User signed in, get their profile
+          const { data: profileData, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+              
+          if (profileData && !error) {
+            const userData: User = {
+              id: session.user.id,
+              email: profileData.email,
+              name: profileData.name,
+              role: profileData.role as UserRole,
+              notificationPreference: profileData.notification_preference as NotificationPreference,
+              phone: profileData.phone,
+              createdAt: new Date(profileData.created_at),
+              updatedAt: new Date(profileData.updated_at)
+            };
+            setUser(userData);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // User signed out
+          setUser(null);
         }
-      } else if (event === 'SIGNED_OUT') {
-        // User signed out
-        setUser(null);
-      }
-    });
+      });
 
-    // Cleanup listener on unmount
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+      // Cleanup listener on unmount
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    }
+  }, [useMockAuth]);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       
+      if (useMockAuth) {
+        // Use mock authentication
+        const result = await userService.login(email, password);
+        
+        if (result.success && result.user) {
+          setUser(result.user);
+          // Store user in localStorage for persistence
+          localStorage.setItem('mockUser', JSON.stringify(result.user));
+          toast.success(`Welcome back, ${result.user.name}`);
+          return true;
+        }
+        
+        toast.error(result.message || "Invalid login credentials");
+        return false;
+      }
+      
+      // Real Supabase authentication
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -172,6 +207,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
+      if (useMockAuth) {
+        // Mock logout: just clear the user state and localStorage
+        setUser(null);
+        localStorage.removeItem('mockUser');
+        toast.success("Logged out successfully");
+        return;
+      }
+      
+      // Real Supabase logout
       await supabase.auth.signOut();
       setUser(null);
       toast.success("Logged out successfully");
