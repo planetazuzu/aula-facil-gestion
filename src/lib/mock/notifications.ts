@@ -1,6 +1,6 @@
-
 import { User, NotificationPreference } from "@/types";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Types for notification service
 export type NotificationChannel = "email" | "whatsapp";
@@ -10,35 +10,6 @@ export type NotificationPayload = {
   userId: string;
   template: NotificationTemplate;
   data: Record<string, any>;
-};
-
-// Mock SendGrid service
-const sendGridService = {
-  sendEmail: async (to: string, template: NotificationTemplate, data: Record<string, any>): Promise<boolean> => {
-    console.log(`[MOCK] SendGrid email sent to ${to} using template ${template}`, data);
-    
-    // In a real implementation, this would call the SendGrid API
-    // return sendGridClient.send({ to, templateId: getTemplateId(template), dynamicTemplateData: data });
-    
-    return new Promise(resolve => {
-      setTimeout(() => resolve(true), 500);
-    });
-  }
-};
-
-// Mock Twilio service
-const twilioService = {
-  sendWhatsApp: async (to: string, template: NotificationTemplate, data: Record<string, any>): Promise<boolean> => {
-    console.log(`[MOCK] Twilio WhatsApp sent to ${to} using template ${template}`, data);
-    
-    // In a real implementation, this would call the Twilio API
-    // const message = getWhatsAppMessageFromTemplate(template, data);
-    // return twilioClient.messages.create({ from: 'whatsapp:+1234567890', to: `whatsapp:${to}`, body: message });
-    
-    return new Promise(resolve => {
-      setTimeout(() => resolve(true), 700);
-    });
-  }
 };
 
 // Template messages for different notification types
@@ -72,44 +43,74 @@ const getWhatsAppMessage = (template: NotificationTemplate, data: Record<string,
   }
 };
 
-// Main notification service
+// Main notification service with N8N integration
 export const notificationService = {
-  // Send a notification through the preferred channel(s)
+  // Send a notification through the preferred channel(s) using N8N
   sendNotification: async (payload: NotificationPayload, userData: User): Promise<boolean> => {
     const { userId, template, data } = payload;
     const { email, phone, notificationPreference } = userData;
     
     try {
-      let emailSent = false;
-      let whatsappSent = false;
+      console.log(`Sending notification to user ${userId} using preference ${notificationPreference}`);
       
-      // Send email if preference includes EMAIL
-      if (
-        notificationPreference === NotificationPreference.EMAIL || 
-        notificationPreference === NotificationPreference.BOTH
-      ) {
-        if (email) {
-          emailSent = await sendGridService.sendEmail(email, template, data);
-          console.log(`Email notification sent to ${email}: ${emailSent}`);
+      let type: "email" | "whatsapp" | "both" = "email"; // Default
+      
+      // Determine notification type based on preference
+      if (notificationPreference === NotificationPreference.EMAIL) {
+        type = "email";
+      } else if (notificationPreference === NotificationPreference.WHATSAPP) {
+        type = "whatsapp";
+      } else if (notificationPreference === NotificationPreference.BOTH) {
+        type = "both";
+      } else if (notificationPreference === NotificationPreference.NONE) {
+        console.log("User has opted out of notifications");
+        return false;
+      }
+      
+      // Prepare recipient information
+      const to = {
+        email: email || undefined,
+        phone: phone || undefined,
+      };
+      
+      // Check if we have the necessary contact info
+      if ((type === "email" || type === "both") && !email) {
+        console.warn(`User ${userId} needs email notification but has no email address.`);
+        if (type === "both" && phone) {
+          // Fallback to WhatsApp only
+          type = "whatsapp";
         } else {
-          console.warn(`User ${userId} has EMAIL preference but no email address.`);
+          return false;
         }
       }
       
-      // Send WhatsApp if preference includes WHATSAPP
-      if (
-        notificationPreference === NotificationPreference.WHATSAPP || 
-        notificationPreference === NotificationPreference.BOTH
-      ) {
-        if (phone) {
-          whatsappSent = await twilioService.sendWhatsApp(phone, template, data);
-          console.log(`WhatsApp notification sent to ${phone}: ${whatsappSent}`);
+      if ((type === "whatsapp" || type === "both") && !phone) {
+        console.warn(`User ${userId} needs WhatsApp notification but has no phone number.`);
+        if (type === "both" && email) {
+          // Fallback to email only
+          type = "email";
         } else {
-          console.warn(`User ${userId} has WHATSAPP preference but no phone number.`);
+          return false;
         }
       }
       
-      return emailSent || whatsappSent;
+      // Call Supabase Edge Function to send notification via N8N
+      const { data: result, error } = await supabase.functions.invoke("notifications", {
+        body: {
+          userId,
+          template,
+          type,
+          data,
+          to,
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log("Notification processing result:", result);
+      return result?.success || false;
     } catch (error) {
       console.error('Error sending notification:', error);
       return false;
@@ -119,34 +120,65 @@ export const notificationService = {
   // Helper to test notifications with UI feedback
   testNotification: async (channel: NotificationChannel, user: User): Promise<void> => {
     try {
-      if (channel === 'email' && user.email) {
-        await sendGridService.sendEmail(
-          user.email, 
-          'course_reminder', 
-          { courseTitle: 'Curso de Prueba', startTime: '10:00' }
-        );
-        toast({
-          title: "Prueba de email enviada",
-          description: `Se ha enviado un correo de prueba a ${user.email}`
-        });
-      } else if (channel === 'whatsapp' && user.phone) {
-        await twilioService.sendWhatsApp(
-          user.phone, 
-          'course_reminder', 
-          { courseTitle: 'Curso de Prueba', startTime: '10:00' }
-        );
-        toast({
-          title: "Prueba de WhatsApp enviada",
-          description: `Se ha enviado un mensaje de prueba al número ${user.phone}`
-        });
-      } else {
+      if (!user) {
         toast({
           title: "Error",
-          description: channel === 'email' 
-            ? "No hay dirección de correo configurada" 
-            : "No hay número de teléfono configurado",
+          description: "Usuario no autenticado",
           variant: "destructive"
         });
+        return;
+      }
+      
+      const type = channel === "email" ? "email" : "whatsapp";
+      
+      // Check for required contact information
+      if (channel === "email" && !user.email) {
+        toast({
+          title: "Error",
+          description: "No hay dirección de correo configurada",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (channel === "whatsapp" && !user.phone) {
+        toast({
+          title: "Error",
+          description: "No hay número de teléfono configurado",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Send test notification using N8N
+      const { data, error } = await supabase.functions.invoke("notifications", {
+        body: {
+          userId: user.id,
+          template: "course_reminder",
+          type,
+          data: { 
+            courseTitle: "Curso de Prueba", 
+            startTime: "10:00",
+            userName: user.name || "Estudiante"
+          },
+          to: {
+            email: channel === "email" ? user.email : undefined,
+            phone: channel === "whatsapp" ? user.phone : undefined,
+          }
+        },
+      });
+      
+      if (error) throw error;
+      
+      if (data?.success) {
+        toast({
+          title: `Prueba de ${channel === "email" ? "email" : "WhatsApp"} enviada`,
+          description: channel === "email" 
+            ? `Se ha enviado un correo de prueba a ${user.email}` 
+            : `Se ha enviado un mensaje de prueba al número ${user.phone}`
+        });
+      } else {
+        throw new Error(data?.error || "Error desconocido");
       }
     } catch (error) {
       console.error(`Error sending test ${channel} notification:`, error);
