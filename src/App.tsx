@@ -14,7 +14,6 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import WaitingList from "./pages/WaitingList";
 import Dashboard from "./pages/Dashboard";
-import CourseRating from "./pages/CourseRating";
 import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
 import Enrollments from "./pages/Enrollments";
@@ -22,6 +21,7 @@ import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
 import Notifications from "./pages/Notifications";
+import Ratings from "./pages/Ratings";
 
 const queryClient = new QueryClient();
 
@@ -43,10 +43,10 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/courses" element={<CoursesAdmin />} />
-            <Route path="/courses/:courseId/rate" element={<CourseRating />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/ratings" element={<Ratings />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

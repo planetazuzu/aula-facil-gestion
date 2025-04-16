@@ -11,7 +11,6 @@ import {
   LogOut, 
   MessageCircle, 
   Settings, 
-  Star, 
   Users,
   BookCheck,
   BookText,
@@ -90,11 +89,6 @@ export function Sidebar({ className }: SidebarProps) {
           href: "/teacher/courses",
           icon: BookCheck,
         },
-        {
-          title: "Valoraciones",
-          href: "/teacher/ratings",
-          icon: Star,
-        },
       ];
     }
     
@@ -109,11 +103,6 @@ export function Sidebar({ className }: SidebarProps) {
         title: "Historial",
         href: "/history",
         icon: Clock,
-      },
-      {
-        title: "Valoraciones",
-        href: "/ratings",
-        icon: Star,
       },
     ];
   })();
