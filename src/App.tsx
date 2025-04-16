@@ -16,6 +16,7 @@ import Dashboard from "./pages/Dashboard";
 import CourseRating from "./pages/CourseRating";
 import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
+import Enrollments from "./pages/Enrollments";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/waitlist" element={<WaitingList />} />
+            <Route path="/enrollments" element={<Enrollments />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/courses/:courseId/rate" element={<CourseRating />} />
             <Route path="/calendar" element={<Calendar />} />
