@@ -1,5 +1,5 @@
 
-import { User, UserRole } from "@/types";
+import { User, UserRole, NotificationPreference } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               email: profileData.email,
               name: profileData.name,
               role: profileData.role as UserRole,
-              notificationPreference: profileData.notification_preference,
+              notificationPreference: profileData.notification_preference as NotificationPreference,
               phone: profileData.phone,
               createdAt: new Date(profileData.created_at),
               updatedAt: new Date(profileData.updated_at)
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: profileData.email,
             name: profileData.name,
             role: profileData.role as UserRole,
-            notificationPreference: profileData.notification_preference,
+            notificationPreference: profileData.notification_preference as NotificationPreference,
             phone: profileData.phone,
             createdAt: new Date(profileData.created_at),
             updatedAt: new Date(profileData.updated_at)
@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: profileData.email,
           name: profileData.name,
           role: profileData.role as UserRole,
-          notificationPreference: profileData.notification_preference,
+          notificationPreference: profileData.notification_preference as NotificationPreference,
           phone: profileData.phone,
           createdAt: new Date(profileData.created_at),
           updatedAt: new Date(profileData.updated_at)
