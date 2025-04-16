@@ -14,6 +14,7 @@ import Courses from "./pages/Courses";
 import WaitingList from "./pages/WaitingList";
 import Dashboard from "./pages/Dashboard";
 import CourseRating from "./pages/CourseRating";
+import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/waitlist" element={<WaitingList />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/courses/:courseId/rate" element={<CourseRating />} />
+            <Route path="/calendar" element={<Calendar />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
