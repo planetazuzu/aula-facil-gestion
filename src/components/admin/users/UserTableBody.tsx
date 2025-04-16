@@ -8,6 +8,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { UserAuthDialog } from "./UserAuthDialog";
 import { getUserRoleBadgeVariant, getUserRoleName, getNotificationPreferenceText } from "./userTableUtils";
+import { UserEditDialog } from "./UserEditDialog";
+import { UserDeleteDialog } from "./UserDeleteDialog";
+import { Button } from "@/components/ui/button";
 
 interface UserTableBodyProps {
   users: User[];
@@ -31,7 +34,11 @@ export function UserTableBody({ users }: UserTableBodyProps) {
             </TableCell>
             <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
             <TableCell>
-              <UserAuthDialog userId={user.id} />
+              <div className="flex items-center space-x-2">
+                <UserAuthDialog userId={user.id} />
+                <UserEditDialog userId={user.id} />
+                <UserDeleteDialog userId={user.id} userName={user.name} />
+              </div>
             </TableCell>
           </TableRow>
         ))

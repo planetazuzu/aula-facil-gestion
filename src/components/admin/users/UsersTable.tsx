@@ -9,6 +9,7 @@ import {
 import { UserTableBody } from "./UserTableBody";
 import { UserTablePagination } from "./UserTablePagination";
 import { UserExportButton } from "./UserExportButton";
+import { UserCreateDialog } from "./UserCreateDialog";
 
 interface UsersTableProps {
   users: User[];
@@ -29,7 +30,8 @@ export function UsersTable({
 }: UsersTableProps) {
   return (
     <div>
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-between mb-2">
+        <UserCreateDialog />
         <UserExportButton users={users} />
       </div>
       
