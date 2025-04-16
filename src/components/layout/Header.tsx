@@ -56,9 +56,11 @@ export function Header({ toggleSidebar }: HeaderProps) {
             <span className="sr-only">Mensajes</span>
           </Link>
         </Button>
-        <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5" />
-          <span className="sr-only">Notificaciones</span>
+        <Button variant="ghost" size="icon" asChild>
+          <Link to="/notifications">
+            <Bell className="h-5 w-5" />
+            <span className="sr-only">Notificaciones</span>
+          </Link>
         </Button>
 
         <DropdownMenu>

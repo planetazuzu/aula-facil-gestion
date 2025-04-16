@@ -20,10 +20,11 @@ import Enrollments from "./pages/Enrollments";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
-import UsersAdmin from "./pages/admin/UsersAdmin"; // Add import for new UsersAdmin page
+import UsersAdmin from "./pages/admin/UsersAdmin";
 import Notifications from "./pages/Notifications";
 import Ratings from "./pages/Ratings";
 import Statistics from "./pages/admin/Statistics";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -45,12 +46,13 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/courses" element={<CoursesAdmin />} />
-            <Route path="/admin/users" element={<UsersAdmin />} /> {/* Add new route */}
+            <Route path="/admin/users" element={<UsersAdmin />} />
             <Route path="/admin/statistics" element={<Statistics />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/ratings" element={<Ratings />} />
+            <Route path="/settings" element={<Settings />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

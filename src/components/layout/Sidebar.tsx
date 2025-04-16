@@ -15,7 +15,8 @@ import {
   Users,
   BookCheck,
   BookText,
-  ChartBar
+  ChartBar,
+  Bell
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,11 @@ export function Sidebar({ className }: SidebarProps) {
         title: "Mensajes",
         href: "/messages",
         icon: MessageCircle,
+      },
+      {
+        title: "Notificaciones",
+        href: "/notifications",
+        icon: Bell,
       },
     ];
     
