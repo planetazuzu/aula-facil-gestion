@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
 import WaitingList from "./pages/WaitingList";
 import Dashboard from "./pages/Dashboard";
 import CourseRating from "./pages/CourseRating";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:courseId" element={<CourseDetail />} />
             <Route path="/waitlist" element={<WaitingList />} />
             <Route path="/enrollments" element={<Enrollments />} />
             <Route path="/history" element={<History />} />
