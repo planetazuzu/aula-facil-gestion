@@ -19,6 +19,7 @@ import Messages from "./pages/Messages";
 import Enrollments from "./pages/Enrollments";
 import NotFound from "./pages/NotFound";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/courses/:courseId/rate" element={<CourseRating />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/notifications" element={<Notifications />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
