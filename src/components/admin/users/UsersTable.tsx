@@ -10,12 +10,34 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { UserAuthDialog } from "./UserAuthDialog";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious,
+  PaginationEllipsis
+} from "@/components/ui/pagination";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 interface UsersTableProps {
   users: User[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems: number;
+  pageSize: number;
 }
 
-export function UsersTable({ users }: UsersTableProps) {
+export function UsersTable({ 
+  users, 
+  currentPage, 
+  totalPages, 
+  onPageChange,
+  totalItems,
+  pageSize
+}: UsersTableProps) {
   
   const getBadgeVariant = (role: UserRole) => {
     switch (role) {
@@ -30,51 +52,156 @@ export function UsersTable({ users }: UsersTableProps) {
     }
   };
 
+  // Determina qué números de página mostrar
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      // Si hay pocas páginas, muestra todas
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Siempre incluye la primera página
+      pages.push(1);
+      
+      // Para páginas intermedias
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(currentPage + 1, totalPages - 1);
+      
+      // Ajusta para mostrar siempre 3 páginas en el medio
+      if (startPage > 2) pages.push(null); // Añade elipsis
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      if (endPage < totalPages - 1) pages.push(null); // Añade elipsis
+      
+      // Siempre incluye la última página
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalItems);
+
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Rol</TableHead>
-            <TableHead>Preferencia Notificación</TableHead>
-            <TableHead>Fecha Registro</TableHead>
-            <TableHead>Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.length > 0 ? (
-            users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <Badge variant={getBadgeVariant(user.role)}>
-                    {user.role === UserRole.ADMIN ? "Administrador" : 
-                     user.role === UserRole.TEACHER ? "Profesor" : "Usuario"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {user.notificationPreference === "EMAIL" ? "Email" : 
-                   user.notificationPreference === "WHATSAPP" ? "WhatsApp" : 
-                   user.notificationPreference === "BOTH" ? "Ambos" : "Ninguno"}
-                </TableCell>
-                <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <UserAuthDialog userId={user.id} />
+    <div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Rol</TableHead>
+              <TableHead>Preferencia Notificación</TableHead>
+              <TableHead>Fecha Registro</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.length > 0 ? (
+              users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant={getBadgeVariant(user.role)}>
+                      {user.role === UserRole.ADMIN ? "Administrador" : 
+                       user.role === UserRole.TEACHER ? "Profesor" : "Usuario"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {user.notificationPreference === "EMAIL" ? "Email" : 
+                     user.notificationPreference === "WHATSAPP" ? "WhatsApp" : 
+                     user.notificationPreference === "BOTH" ? "Ambos" : "Ninguno"}
+                  </TableCell>
+                  <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <UserAuthDialog userId={user.id} />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  No se encontraron usuarios.
                 </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
-                No se encontraron usuarios.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+        <div className="text-sm text-muted-foreground">
+          Mostrando {users.length > 0 ? startItem : 0} a {endItem} de {totalItems} usuarios
+        </div>
+        
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink 
+                onClick={() => onPageChange(1)} 
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              >
+                <ChevronsLeft className="h-4 w-4 mr-1" />
+                Inicio
+              </PaginationLink>
+            </PaginationItem>
+            
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => onPageChange(currentPage - 1)} 
+                disabled={currentPage === 1}
+                className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            
+            {getPageNumbers().map((page, i) => (
+              page === null ? (
+                <PaginationItem key={`ellipsis-${i}`}>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              ) : (
+                <PaginationItem key={`page-${page}`}>
+                  <PaginationLink 
+                    isActive={page === currentPage}
+                    onClick={() => onPageChange(page as number)}
+                    className="cursor-pointer"
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              )
+            ))}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => onPageChange(currentPage + 1)} 
+                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            
+            <PaginationItem>
+              <PaginationLink 
+                onClick={() => onPageChange(totalPages)} 
+                disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              >
+                Final
+                <ChevronsRight className="h-4 w-4 ml-1" />
+              </PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

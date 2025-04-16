@@ -10,6 +10,8 @@ import { UsersTable } from "@/components/admin/users/UsersTable";
 export default function UsersAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   
   const filteredUsers = mockUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -17,6 +19,15 @@ export default function UsersAdmin() {
     const matchesRole = roleFilter === "" || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
+
+  // Calcula el total de páginas
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  
+  // Obtiene los usuarios para la página actual
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <Layout requireAuth={true} allowedRoles={[UserRole.ADMIN]}>
@@ -33,9 +44,18 @@ export default function UsersAdmin() {
               setSearchTerm={setSearchTerm}
               roleFilter={roleFilter}
               setRoleFilter={setRoleFilter}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
             />
             
-            <UsersTable users={filteredUsers} />
+            <UsersTable 
+              users={paginatedUsers} 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={filteredUsers.length}
+              pageSize={pageSize}
+            />
           </CardContent>
         </Card>
       </div>
