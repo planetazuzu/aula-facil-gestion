@@ -1,244 +1,143 @@
 
-import { CourseCard } from "@/components/courses/CourseCard";
-import { CourseFilters } from "@/components/courses/CourseFilters";
 import { Layout } from "@/components/layout/Layout";
-import { mockService } from "@/lib/mockData";
-import { Course, CourseFilter, EnrollmentStatus } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { BookSearch } from "lucide-react";
+import { mockService } from "@/lib/mockData";
+import { Course, CourseFilter } from "@/types";
+import { Search, Filter, BookText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Courses() {
-  const { user } = useAuth();
-  const { toast } = useToast();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [userEnrollments, setUserEnrollments] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [locations, setLocations] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchCourses = async () => {
       try {
-        const coursesData = await mockService.getCourses();
-        setCourses(coursesData);
-        setFilteredCourses(coursesData);
-        
-        // Extract unique topics and locations for filters
-        const uniqueTopics = Array.from(new Set(coursesData.map(course => course.topic)));
-        const uniqueLocations = Array.from(new Set(coursesData.map(course => course.location)));
-        
-        setTopics(uniqueTopics);
-        setLocations(uniqueLocations);
-        
-        // Fetch user enrollments if logged in
-        if (user) {
-          const enrollments = await mockService.getUserEnrollments(user.id);
-          setUserEnrollments(enrollments);
-        }
+        const data = await mockService.getCourses();
+        setCourses(data);
       } catch (error) {
         console.error("Error fetching courses:", error);
         toast({
           title: "Error",
-          description: "No se pudieron cargar los cursos.",
+          description: "No se pudieron cargar los cursos. Intenta de nuevo más tarde.",
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
-    }
-    
-    fetchData();
-  }, [user, toast]);
+    };
 
-  const handleFilter = (filter: CourseFilter) => {
-    const filtered = courses.filter(course => {
-      // Check topic
-      if (filter.topic && course.topic !== filter.topic) {
-        return false;
-      }
-      
-      // Check location
-      if (filter.location && course.location !== filter.location) {
-        return false;
-      }
-      
-      // Check start date
-      if (filter.startDate) {
-        const courseStartDate = new Date(course.startDate);
-        const filterStartDate = new Date(filter.startDate);
-        
-        // Set time to 00:00:00 for both dates for fair comparison
-        courseStartDate.setHours(0, 0, 0, 0);
-        filterStartDate.setHours(0, 0, 0, 0);
-        
-        if (courseStartDate < filterStartDate) {
-          return false;
-        }
-      }
-      
-      // Check status
-      if (filter.status && course.status !== filter.status) {
-        return false;
-      }
-      
-      return true;
-    });
-    
-    setFilteredCourses(filtered);
-  };
+    fetchCourses();
+  }, [toast]);
 
-  const handleEnroll = async (courseId: string) => {
-    if (!user) {
-      toast({
-        title: "Inicio de sesión requerido",
-        description: "Debes iniciar sesión para inscribirte a un curso.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const result = await mockService.enrollInCourse(user.id, courseId);
-      
-      if (result.success) {
-        // Refresh enrollments and courses
-        const enrollments = await mockService.getUserEnrollments(user.id);
-        setUserEnrollments(enrollments);
-        
-        const updatedCourses = await mockService.getCourses();
-        setCourses(updatedCourses);
-        handleFilter({}); // Reset filters
-        
-        toast({
-          title: "Éxito",
-          description: result.message,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error enrolling:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo completar la inscripción.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCancelEnrollment = async (courseId: string) => {
-    if (!user) return;
-    
-    const enrollment = userEnrollments.find(
-      e => e.courseId === courseId && 
-      (e.status === EnrollmentStatus.ENROLLED || e.status === EnrollmentStatus.WAITLISTED)
-    );
-    
-    if (!enrollment) {
-      toast({
-        title: "Error",
-        description: "No se encontró la inscripción.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const result = await mockService.cancelEnrollment(enrollment.id);
-      
-      if (result.success) {
-        // Refresh enrollments and courses
-        const enrollments = await mockService.getUserEnrollments(user.id);
-        setUserEnrollments(enrollments);
-        
-        const updatedCourses = await mockService.getCourses();
-        setCourses(updatedCourses);
-        handleFilter({}); // Reset filters
-        
-        toast({
-          title: "Éxito",
-          description: result.message,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error cancelling enrollment:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo cancelar la inscripción.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isEnrolled = (courseId: string) => {
-    return userEnrollments.some(
-      enrollment => enrollment.courseId === courseId && 
-      (enrollment.status === EnrollmentStatus.ENROLLED || enrollment.status === EnrollmentStatus.WAITLISTED)
-    );
-  };
-
-  const getEnrollmentStatus = (courseId: string) => {
-    const enrollment = userEnrollments.find(
-      enrollment => enrollment.courseId === courseId
-    );
-    return enrollment?.status;
-  };
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.topic.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Cursos Disponibles</h1>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-4">Cursos disponibles</h1>
           <p className="text-muted-foreground">
-            Explora todos nuestros cursos y filtra por tus intereses.
+            Explora nuestra amplia selección de cursos y encuentra el que mejor se adapte a tus
+            intereses y necesidades.
           </p>
         </div>
-        
-        <CourseFilters 
-          onFilter={handleFilter} 
-          topics={topics} 
-          locations={locations} 
-        />
-        
-        {filteredCourses.length > 0 ? (
+
+        <div className="mb-6">
+          <div className="flex gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por título, descripción o temática..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className="h-10 w-10"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {showFilters && (
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <p>Filtros avanzados (Próximamente)</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="h-48 bg-muted animate-pulse" />
+                <CardContent className="p-4">
+                  <div className="h-6 bg-muted animate-pulse mb-2 rounded" />
+                  <div className="h-4 bg-muted animate-pulse mb-2 rounded w-3/4" />
+                  <div className="h-4 bg-muted animate-pulse mb-2 rounded w-1/2" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                isEnrolled={isEnrolled(course.id)}
-                enrollmentStatus={getEnrollmentStatus(course.id)}
-                onEnroll={handleEnroll}
-                onCancelEnrollment={handleCancelEnrollment}
-                isLoading={isLoading}
-              />
+              <Card key={course.id} className="overflow-hidden h-full flex flex-col">
+                <div className="aspect-video bg-muted relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <BookText className="h-12 w-12 text-muted-foreground/40" />
+                  </div>
+                </div>
+                <CardContent className="p-4 flex-1 flex flex-col">
+                  <h3 className="font-bold text-lg mb-2">{course.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 flex-1">
+                    {course.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                      {course.topic}
+                    </span>
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                      {course.location}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-semibold">
+                      {course.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>
+                      Plazas: {course.enrolled}/{course.capacity}
+                    </span>
+                    <Button size="sm">Ver detalles</Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-muted rounded-lg">
-            <BookSearch className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium mb-2">No se encontraron cursos</h3>
+          <div className="text-center py-12">
+            <BookText className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">No se encontraron cursos</h3>
             <p className="text-muted-foreground">
-              No hay cursos que coincidan con los criterios de búsqueda. Intenta con otros filtros.
+              No hay cursos que coincidan con tu búsqueda. Intenta con otros términos.
             </p>
           </div>
         )}
