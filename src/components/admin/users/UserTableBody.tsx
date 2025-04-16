@@ -1,5 +1,5 @@
 
-import { User, UserRole } from "@/types";
+import { User } from "@/types";
 import { 
   TableBody, 
   TableCell, 
@@ -10,7 +10,6 @@ import { UserAuthDialog } from "./UserAuthDialog";
 import { getUserRoleBadgeVariant, getUserRoleName, getNotificationPreferenceText } from "./userTableUtils";
 import { UserEditDialog } from "./UserEditDialog";
 import { UserDeleteDialog } from "./UserDeleteDialog";
-import { Button } from "@/components/ui/button";
 
 interface UserTableBodyProps {
   users: User[];

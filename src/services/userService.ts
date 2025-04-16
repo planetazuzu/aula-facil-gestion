@@ -7,6 +7,7 @@ export const userService = {
   // Get all users with pagination
   getUsers: async ({ page = 1, pageSize = 10, searchTerm = "", roleFilter = "" }) => {
     try {
+      // We need to use 'from' with a string since the type definition isn't properly recognizing user_profiles
       let query = supabase
         .from('user_profiles')
         .select('*', { count: 'exact' });
@@ -29,14 +30,16 @@ export const userService = {
       
       if (error) throw error;
       
+      if (!data) return { users: [], totalCount: 0, totalPages: 0 };
+      
       // Transform the data to match our User type
       const users: User[] = data.map(item => ({
-        id: item.id,
-        email: item.email,
-        name: item.name,
+        id: item.id as string,
+        email: item.email as string,
+        name: item.name as string,
         role: item.role as UserRole,
         notificationPreference: item.notification_preference as NotificationPreference,
-        phone: item.phone,
+        phone: item.phone as string | undefined,
         createdAt: new Date(item.created_at),
         updatedAt: new Date(item.updated_at),
       }));
@@ -68,12 +71,12 @@ export const userService = {
       
       // Transform to User type
       const user: User = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
+        id: data.id as string,
+        email: data.email as string,
+        name: data.name as string,
         role: data.role as UserRole,
         notificationPreference: data.notification_preference as NotificationPreference,
-        phone: data.phone,
+        phone: data.phone as string | undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };
@@ -116,14 +119,16 @@ export const userService = {
       
       if (error) throw error;
       
+      if (!data) throw new Error("Failed to create user profile");
+      
       // Transform to User type
       const newUser: User = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
+        id: data.id as string,
+        email: data.email as string,
+        name: data.name as string,
         role: data.role as UserRole,
         notificationPreference: data.notification_preference as NotificationPreference,
-        phone: data.phone,
+        phone: data.phone as string | undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };
@@ -157,14 +162,16 @@ export const userService = {
       
       if (error) throw error;
       
+      if (!data) throw new Error("Failed to update user");
+      
       // Transform to User type
       const updatedUser: User = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
+        id: data.id as string,
+        email: data.email as string,
+        name: data.name as string,
         role: data.role as UserRole,
         notificationPreference: data.notification_preference as NotificationPreference,
-        phone: data.phone,
+        phone: data.phone as string | undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };
