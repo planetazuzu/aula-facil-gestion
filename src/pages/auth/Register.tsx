@@ -17,7 +17,7 @@ import { AlertCircle, BookOpen, Lock, Mail, Phone, User } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { NotificationPreference, UserRole } from "@/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { mockUsers } from "@/lib/mock";
+import { mockUsers } from "@/lib/mock/users";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -38,6 +38,7 @@ const formSchema = z.object({
     NotificationPreference.EMAIL,
     NotificationPreference.WHATSAPP,
     NotificationPreference.BOTH,
+    NotificationPreference.NONE,
   ]),
   phone: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -61,7 +62,6 @@ const formSchema = z.object({
 
 export default function Register() {
   const { user, login } = useAuth();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,8 +89,10 @@ export default function Register() {
         return;
       }
       
-      // Add new user to mockUsers with a unique ID
-      const newUserId = String(mockUsers.length + 1);
+      // Generate a unique ID for the new user
+      const newUserId = String(Date.now());
+      
+      // Add new user to mockUsers array
       mockUsers.push({
         id: newUserId,
         email: values.email,
@@ -102,13 +104,20 @@ export default function Register() {
         updatedAt: new Date(),
       });
       
-      toast({
-        title: "Registro exitoso",
-        description: "Tu cuenta ha sido creada correctamente. Iniciando sesión...",
+      toast.success("Registro exitoso", {
+        description: "Tu cuenta ha sido creada correctamente. Iniciando sesión..."
       });
       
       // Login the user automatically
-      await login(values.email, values.password);
+      const loginResult = await login(values.email, values.password);
+      
+      if (!loginResult) {
+        // In case login fails, show a message but don't treat it as an error
+        // since registration was successful
+        toast.info("Cuenta creada correctamente", {
+          description: "Por favor inicia sesión con tus credenciales."
+        });
+      }
       
     } catch (err) {
       console.error("Register error:", err);
@@ -262,6 +271,9 @@ export default function Register() {
                         </SelectItem>
                         <SelectItem value={NotificationPreference.BOTH}>
                           Email y WhatsApp
+                        </SelectItem>
+                        <SelectItem value={NotificationPreference.NONE}>
+                          Ninguna
                         </SelectItem>
                       </SelectContent>
                     </Select>

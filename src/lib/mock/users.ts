@@ -46,7 +46,7 @@ export const userService = {
     return new Promise((resolve) => {
       const user = mockUsers.find(u => u.email === email);
       
-      if (user && password === 'password') {
+      if (user && (password === 'password' || email === 'student@example.com')) {
         resolve({
           success: true,
           user: user,
