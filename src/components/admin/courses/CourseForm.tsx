@@ -13,7 +13,14 @@ import {
 } from "@/components/ui/dialog";
 
 import { useForm } from "react-hook-form";
-import { FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
 
 interface CourseFormProps {
   open: boolean;
@@ -35,6 +42,8 @@ export function CourseForm({ open, onOpenChange, onSubmit }: CourseFormProps) {
     },
   });
 
+  const handleSubmit = form.handleSubmit(onSubmit);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
@@ -44,99 +53,134 @@ export function CourseForm({ open, onOpenChange, onSubmit }: CourseFormProps) {
             Complete los detalles del curso y haga clic en guardar cuando termine.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="title" className="text-right">
-                Título
-              </FormLabel>
-              <Input
-                id="title"
-                className="col-span-3"
-                {...form.register("title", { required: true })}
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 py-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Título</FormLabel>
+                    <FormControl>
+                      <Input className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="topic"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Tema</FormLabel>
+                    <FormControl>
+                      <Input className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Descripción</FormLabel>
+                    <FormControl>
+                      <Textarea className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Ubicación</FormLabel>
+                    <FormControl>
+                      <Input className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Fecha inicio</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Fecha fin</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Capacidad</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        className="col-span-3" 
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} 
+                      />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="instructor"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Instructor</FormLabel>
+                    <FormControl>
+                      <Input className="col-span-3" {...field} />
+                    </FormControl>
+                    <FormMessage className="col-span-3 col-start-2" />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="topic" className="text-right">
-                Tema
-              </FormLabel>
-              <Input
-                id="topic"
-                className="col-span-3"
-                {...form.register("topic", { required: true })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="description" className="text-right">
-                Descripción
-              </FormLabel>
-              <Textarea
-                id="description"
-                className="col-span-3"
-                {...form.register("description", { required: true })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="location" className="text-right">
-                Ubicación
-              </FormLabel>
-              <Input
-                id="location"
-                className="col-span-3"
-                {...form.register("location", { required: true })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="startDate" className="text-right">
-                Fecha inicio
-              </FormLabel>
-              <Input
-                id="startDate"
-                type="datetime-local"
-                className="col-span-3"
-                {...form.register("startDate", { required: true })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="endDate" className="text-right">
-                Fecha fin
-              </FormLabel>
-              <Input
-                id="endDate"
-                type="datetime-local"
-                className="col-span-3"
-                {...form.register("endDate", { required: true })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="capacity" className="text-right">
-                Capacidad
-              </FormLabel>
-              <Input
-                id="capacity"
-                type="number"
-                className="col-span-3"
-                {...form.register("capacity", { required: true, min: 1 })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel htmlFor="instructor" className="text-right">
-                Instructor
-              </FormLabel>
-              <Input
-                id="instructor"
-                className="col-span-3"
-                {...form.register("instructor", { required: true })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit">Guardar</Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">Guardar</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
