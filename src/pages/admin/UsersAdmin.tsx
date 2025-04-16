@@ -21,11 +21,44 @@ import {
   SelectValue, 
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Bell, Search } from "lucide-react";
+import { Bell, Check, Search, Shield, UserCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useToast } from "@/components/ui/use-toast";
+
+// Define the schema for user authentication
+const authUserSchema = z.object({
+  userId: z.string().min(1, "Se requiere ID de usuario"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres")
+});
+
+type AuthUserFormValues = z.infer<typeof authUserSchema>;
 
 export default function UsersAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("");
+  const { toast } = useToast();
+  
+  // Form hook for user authentication
+  const form = useForm<AuthUserFormValues>({
+    resolver: zodResolver(authUserSchema),
+    defaultValues: {
+      userId: "",
+      password: ""
+    }
+  });
   
   const filteredUsers = mockUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -45,6 +78,27 @@ export default function UsersAdmin() {
       default:
         return "outline";
     }
+  };
+
+  // Function to handle user authentication
+  const handleAuthenticateUser = (userId: string) => {
+    form.setValue("userId", userId);
+  };
+
+  // Function to submit authentication form
+  const onSubmit = (values: AuthUserFormValues) => {
+    console.log("Authenticating user:", values);
+    
+    // In a real application, this would call an API endpoint to authenticate the user
+    // For this mock implementation, we'll just show a success toast
+    
+    toast({
+      title: "Usuario autenticado",
+      description: "El usuario ha sido autenticado correctamente",
+      variant: "default",
+    });
+    
+    form.reset();
   };
 
   return (
@@ -72,7 +126,7 @@ export default function UsersAdmin() {
                   <SelectValue placeholder="Todos los roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos los roles</SelectItem>
+                  <SelectItem value="">Todos los roles</SelectItem>
                   <SelectItem value={UserRole.ADMIN}>Administrador</SelectItem>
                   <SelectItem value={UserRole.TEACHER}>Profesor</SelectItem>
                   <SelectItem value={UserRole.USER}>Usuario</SelectItem>
@@ -89,6 +143,7 @@ export default function UsersAdmin() {
                     <TableHead>Rol</TableHead>
                     <TableHead>Preferencia Notificación</TableHead>
                     <TableHead>Fecha Registro</TableHead>
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -109,11 +164,76 @@ export default function UsersAdmin() {
                            user.notificationPreference === "BOTH" ? "Ambos" : "Ninguno"}
                         </TableCell>
                         <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleAuthenticateUser(user.id)}
+                              >
+                                <UserCheck className="h-4 w-4 mr-1" />
+                                Autenticar
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Autenticar Usuario</DialogTitle>
+                                <DialogDescription>
+                                  Establece una contraseña para autenticar al usuario seleccionado.
+                                </DialogDescription>
+                              </DialogHeader>
+                              
+                              <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                  <FormField
+                                    control={form.control}
+                                    name="userId"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>ID de Usuario</FormLabel>
+                                        <FormControl>
+                                          <Input {...field} disabled />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  
+                                  <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Nueva Contraseña</FormLabel>
+                                        <FormControl>
+                                          <Input 
+                                            type="password" 
+                                            placeholder="Ingresa la nueva contraseña" 
+                                            {...field} 
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  
+                                  <DialogFooter>
+                                    <Button type="submit">
+                                      <Shield className="h-4 w-4 mr-2" />
+                                      Autenticar Usuario
+                                    </Button>
+                                  </DialogFooter>
+                                </form>
+                              </Form>
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                         No se encontraron usuarios.
                       </TableCell>
                     </TableRow>
