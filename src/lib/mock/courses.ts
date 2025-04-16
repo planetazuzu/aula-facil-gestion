@@ -90,4 +90,35 @@ export const courseService = {
   getCourseById: (courseId: string): Course | undefined => {
     return mockCourses.find(c => c.id === courseId);
   },
+  
+  createCourse: (course: Course): Promise<Course> => {
+    return new Promise((resolve) => {
+      mockCourses.push(course);
+      resolve(course);
+    });
+  },
+  
+  deleteCourse: (courseId: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const courseIndex = mockCourses.findIndex(c => c.id === courseId);
+      if (courseIndex !== -1) {
+        mockCourses.splice(courseIndex, 1);
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
+  },
+  
+  updateCourse: (courseId: string, updatedCourse: Partial<Course>): Promise<Course | null> => {
+    return new Promise((resolve) => {
+      const courseIndex = mockCourses.findIndex(c => c.id === courseId);
+      if (courseIndex !== -1) {
+        mockCourses[courseIndex] = { ...mockCourses[courseIndex], ...updatedCourse };
+        resolve(mockCourses[courseIndex]);
+      } else {
+        resolve(null);
+      }
+    });
+  }
 };

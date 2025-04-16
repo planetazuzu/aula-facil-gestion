@@ -14,6 +14,9 @@ export const mockService = {
   // Course service methods
   getCourses: courseService.getCourses,
   getCourseById: courseService.getCourseById,
+  createCourse: courseService.createCourse,
+  deleteCourse: courseService.deleteCourse,
+  updateCourse: courseService.updateCourse,
   
   // Enrollment service methods
   getEnrollmentsByUserId: enrollmentService.getEnrollmentsByUserId,
