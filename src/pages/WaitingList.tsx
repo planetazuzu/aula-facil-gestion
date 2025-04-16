@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { mockService } from "@/lib/mockData";
@@ -11,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 export default function WaitingList() {
   const { user } = useAuth();
@@ -27,7 +27,6 @@ export default function WaitingList() {
         const enrollmentsData = await mockService.getEnrollmentsByUserId(user.id);
         const coursesData = await mockService.getCourses();
         
-        // Filtrar solo inscripciones en lista de espera
         const waitlistData = enrollmentsData.filter(
           (enrollment) => enrollment.status === EnrollmentStatus.WAITLISTED
         );
@@ -56,7 +55,6 @@ export default function WaitingList() {
       const result = await mockService.cancelEnrollment(user.id, courseId);
       
       if (result.success) {
-        // Actualizar la lista local
         setWaitlistEnrollments(waitlistEnrollments.filter(
           (enrollment) => enrollment.courseId !== courseId
         ));
@@ -82,27 +80,22 @@ export default function WaitingList() {
     }
   };
 
-  // Obtener curso correspondiente a una inscripción
   const getCourseDetails = (courseId: string) => {
     return courses.find((course) => course.id === courseId);
   };
 
-  // Calcular posición en la lista de espera
   const getWaitlistPosition = (enrollment: Enrollment) => {
     const course = getCourseDetails(enrollment.courseId);
     if (!course) return "Desconocida";
     
-    // Encontrar todas las inscripciones en lista de espera para este curso
     const courseWaitlist = waitlistEnrollments.filter(
       (e) => e.courseId === enrollment.courseId
     );
     
-    // Ordenar por fecha de inscripción (primero los más antiguos)
     const sortedWaitlist = courseWaitlist.sort(
       (a, b) => a.enrollmentDate.getTime() - b.enrollmentDate.getTime()
     );
     
-    // Encontrar la posición del usuario actual
     const position = sortedWaitlist.findIndex(
       (e) => e.id === enrollment.id
     );
@@ -121,7 +114,6 @@ export default function WaitingList() {
         </div>
 
         {loading ? (
-          // Skeleton loader
           <div className="grid grid-cols-1 gap-6">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
@@ -219,7 +211,9 @@ export default function WaitingList() {
               <p className="text-muted-foreground mb-6">
                 Cuando te inscribas a un curso lleno, aparecerá aquí. Se te notificará automáticamente cuando haya una plaza disponible.
               </p>
-              <Button variant="outline" href="/courses">Ver cursos disponibles</Button>
+              <Button variant="outline" asChild>
+                <Link to="/courses">Ver cursos disponibles</Link>
+              </Button>
             </CardContent>
           </Card>
         )}

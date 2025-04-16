@@ -1,3 +1,4 @@
+
 import { User, UserRole, NotificationPreference, Message } from "@/types";
 import { Course, Enrollment, CourseStatus, EnrollmentStatus } from "@/types";
 
@@ -28,6 +29,10 @@ export const mockService = {
 
   getUserById: (id: string): User | undefined => {
     return mockUsers.find(u => u.id === id);
+  },
+  
+  getTotalUserCount: (): number => {
+    return 350; // Número fijo de usuarios para mostrar en el dashboard
   },
 
   getCourses: (): Promise<Course[]> => {
@@ -200,70 +205,10 @@ export const mockUsers: User[] = [
   },
 ];
 
-export const mockCourses: Course[] = [
-  {
-    id: "1",
-    title: "Introducción a la Programación",
-    description: "Aprende los fundamentos de la programación.",
-    topic: "Programación",
-    location: "Online",
-    startDate: new Date("2024-02-01"),
-    endDate: new Date("2024-03-01"),
-    capacity: 30,
-    enrolled: 25,
-    waitlist: 5,
-    teacherId: "2",
-    status: CourseStatus.ONGOING,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "2",
-    title: "Marketing Digital Avanzado",
-    description: "Estrategias avanzadas de marketing en línea.",
-    topic: "Marketing",
-    location: "Presencial",
-    startDate: new Date("2024-03-15"),
-    endDate: new Date("2024-04-15"),
-    capacity: 20,
-    enrolled: 18,
-    waitlist: 2,
-    teacherId: "2",
-    status: CourseStatus.UPCOMING,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+// La lista de cursos ahora está vacía
+export const mockCourses: Course[] = [];
 
-export const mockEnrollments: Enrollment[] = [
-  {
-    id: "1",
-    userId: "1",
-    courseId: "1",
-    status: EnrollmentStatus.ENROLLED,
-    enrollmentDate: new Date("2024-01-15"),
-    rating: 4,
-    feedback: "Excelente curso, muy práctico",
-  },
-  {
-    id: "2",
-    userId: "3",
-    courseId: "1",
-    status: EnrollmentStatus.COMPLETED,
-    enrollmentDate: new Date("2023-11-20"),
-    rating: 5,
-    feedback: "Muy completo y bien explicado",
-  },
-  {
-    id: "3",
-    userId: "2",
-    courseId: "2",
-    status: EnrollmentStatus.ENROLLED,
-    enrollmentDate: new Date("2024-02-28"),
-    rating: null,
-    feedback: null,
-  },
-];
+export const mockEnrollments: Enrollment[] = [];
 
 export const getNextWaitlistedUser = (courseId: string): string | null => {
   const waitlistedEnrollments = mockEnrollments
@@ -315,21 +260,4 @@ export const enrollUser = (userId: string, courseId: string): boolean => {
   return false;
 };
 
-export const mockMessages: Message[] = [
-  {
-    id: "1",
-    senderId: "1",
-    receiverId: "2",
-    content: "Hola, ¿cómo estás?",
-    read: false,
-    createdAt: new Date(),
-  },
-  {
-    id: "2",
-    senderId: "2",
-    receiverId: "1",
-    content: "¡Hola! Estoy bien, gracias. ¿Y tú?",
-    read: true,
-    createdAt: new Date(),
-  },
-];
+export const mockMessages: Message[] = [];
