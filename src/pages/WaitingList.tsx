@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
-import { mockService } from "@/lib/mockData";
+import { mockService } from "@/lib/mock"; // Updated import
 import { useAuth } from "@/contexts/AuthContext";
 import { Enrollment, EnrollmentStatus, Course } from "@/types";
 import { useToast } from "@/components/ui/use-toast";

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -59,7 +58,7 @@ export function CourseFilters({ onFilter, topics, locations }: CourseFiltersProp
     
     if (values.topic) filter.topic = values.topic;
     if (values.location) filter.location = values.location;
-    if (values.startDate) filter.startDate = values.startDate;
+    if (values.startDate) filter.startDate = format(values.startDate, 'yyyy-MM-dd'); // Convert Date to string
     if (values.status) filter.status = values.status as CourseStatus;
     
     onFilter(filter);

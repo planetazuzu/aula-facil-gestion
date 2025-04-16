@@ -1,7 +1,7 @@
 
 import { Layout } from "@/components/layout/Layout";
 import { useEffect, useState } from "react";
-import { mockService } from "@/lib/mockData";
+import { mockService } from "@/lib/mock"; // Updated import
 import { Course, CourseFilter, Enrollment, EnrollmentStatus } from "@/types";
 import { Search, BookText, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";

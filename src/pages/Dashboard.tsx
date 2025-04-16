@@ -2,7 +2,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen, CalendarDays, Award } from "lucide-react";
-import { mockService } from "@/lib/mockData";
+import { mockService } from "@/lib/mock"; // Updated import
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
 
