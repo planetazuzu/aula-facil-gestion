@@ -1,5 +1,4 @@
 import { User, UserRole, NotificationPreference, Message } from "@/types";
-import { mockUsers } from "./mockData"; // Self-referencing to avoid circular import
 import { Course, Enrollment, CourseStatus, EnrollmentStatus } from "@/types";
 
 type LoginResult = {
@@ -27,15 +26,137 @@ export const mockService = {
     });
   },
 
-  // Otros métodos mock que podrías necesitar
   getUserById: (id: string): User | undefined => {
     return mockUsers.find(u => u.id === id);
   },
 
-  // Método mock para crear mensajes
+  getCourses: (): Promise<Course[]> => {
+    return new Promise((resolve) => {
+      resolve(mockCourses);
+    });
+  },
+
+  getEnrollmentsByUserId: (userId: string): Promise<Enrollment[]> => {
+    return new Promise((resolve) => {
+      resolve(mockEnrollments.filter(e => e.userId === userId));
+    });
+  },
+
+  getCourseWaitlist: (courseId: string): Promise<Enrollment[]> => {
+    return new Promise((resolve) => {
+      resolve(
+        mockEnrollments.filter(
+          e => e.courseId === courseId && e.status === EnrollmentStatus.WAITLISTED
+        ).sort((a, b) => a.enrollmentDate.getTime() - b.enrollmentDate.getTime())
+      );
+    });
+  },
+
+  enrollUserInCourse: (userId: string, courseId: string): Promise<{ success: boolean; enrolled: boolean; waitlisted: boolean; message: string }> => {
+    return new Promise((resolve) => {
+      const result = enrollUser(userId, courseId);
+      const course = mockCourses.find(c => c.id === courseId);
+      
+      if (!course) {
+        resolve({ 
+          success: false, 
+          enrolled: false, 
+          waitlisted: false, 
+          message: "Curso no encontrado" 
+        });
+        return;
+      }
+      
+      const enrollment = mockEnrollments.find(
+        e => e.userId === userId && e.courseId === courseId
+      );
+      
+      if (enrollment) {
+        if (enrollment.status === EnrollmentStatus.ENROLLED) {
+          resolve({ 
+            success: true, 
+            enrolled: true, 
+            waitlisted: false, 
+            message: "Ya estás inscrito en este curso" 
+          });
+        } else if (enrollment.status === EnrollmentStatus.WAITLISTED) {
+          resolve({ 
+            success: true, 
+            enrolled: false, 
+            waitlisted: true, 
+            message: "Has sido añadido a la lista de espera" 
+          });
+        }
+      } else if (result) {
+        resolve({ 
+          success: true, 
+          enrolled: true, 
+          waitlisted: false, 
+          message: "Te has inscrito correctamente" 
+        });
+      } else {
+        resolve({ 
+          success: true, 
+          enrolled: false, 
+          waitlisted: true, 
+          message: "Has sido añadido a la lista de espera" 
+        });
+      }
+    });
+  },
+
+  cancelEnrollment: (userId: string, courseId: string): Promise<{ success: boolean; message: string }> => {
+    return new Promise((resolve) => {
+      const enrollment = mockEnrollments.find(
+        e => e.userId === userId && e.courseId === courseId
+      );
+      
+      if (!enrollment) {
+        resolve({ success: false, message: "No estás inscrito en este curso" });
+        return;
+      }
+      
+      const wasEnrolled = enrollment.status === EnrollmentStatus.ENROLLED;
+      
+      enrollment.status = EnrollmentStatus.CANCELLED;
+      
+      const course = mockCourses.find(c => c.id === courseId);
+      if (course) {
+        if (wasEnrolled) {
+          course.enrolled--;
+          
+          const nextInWaitlist = getNextWaitlistedUser(courseId);
+          if (nextInWaitlist) {
+            const waitlistedEnrollment = mockEnrollments.find(
+              e => e.userId === nextInWaitlist && e.courseId === courseId
+            );
+            if (waitlistedEnrollment) {
+              waitlistedEnrollment.status = EnrollmentStatus.ENROLLED;
+              course.waitlist--;
+              course.enrolled++;
+            }
+          }
+          
+          resolve({ 
+            success: true, 
+            message: "Inscripción cancelada correctamente" 
+          });
+        } else {
+          course.waitlist--;
+          resolve({ 
+            success: true, 
+            message: "Has salido de la lista de espera" 
+          });
+        }
+      } else {
+        resolve({ success: false, message: "Curso no encontrado" });
+      }
+    });
+  },
+
   createMessage: (senderId: string, receiverId: string, content: string): Message => {
     const newMessage: Message = {
-      id: String(mockUsers.length + 1),
+      id: String(mockMessages.length + 1),
       senderId,
       receiverId,
       content,
@@ -43,7 +164,6 @@ export const mockService = {
       createdAt: new Date(),
     };
 
-    // En un escenario real, esto se manejaría en el backend
     mockMessages.push(newMessage);
     return newMessage;
   },
