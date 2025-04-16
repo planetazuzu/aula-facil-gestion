@@ -7,22 +7,37 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { mockService } from "@/lib/mock";
-import { BookOpen, CalendarClock, Clock, Download, Search } from "lucide-react";
+import { BookOpen, CalendarClock, Clock, Download, Search, Filter, SortDesc, SortAsc } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Enrollment, EnrollmentStatus, Course } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
 
 // Extend the Enrollment type locally to include course details
 interface EnrollmentWithCourse extends Enrollment {
   course: Course;
 }
 
+type SortOrder = "newest" | "oldest";
+type StatusFilter = "all" | EnrollmentStatus.COMPLETED | EnrollmentStatus.CANCELLED;
+
 export default function History() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [enrollments, setEnrollments] = useState<EnrollmentWithCourse[]>([]);
+  const [filteredEnrollments, setFilteredEnrollments] = useState<EnrollmentWithCourse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   // Fetch past enrollments
   useEffect(() => {
@@ -51,6 +66,7 @@ export default function History() {
           );
           
           setEnrollments(enrollmentsWithCourses);
+          setFilteredEnrollments(enrollmentsWithCourses);
         } catch (error) {
           console.error("Error fetching enrollment history:", error);
         } finally {
@@ -62,18 +78,62 @@ export default function History() {
     }
   }, [user]);
 
-  // Filter enrollments based on search term
-  const filteredEnrollments = searchTerm
-    ? enrollments.filter(enrollment => 
+  // Apply all filters when they change
+  useEffect(() => {
+    let filtered = [...enrollments];
+    
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(enrollment => 
         enrollment.course.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : enrollments;
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(enrollment => enrollment.status === statusFilter);
+    }
+    
+    // Apply date filters
+    if (startDate) {
+      filtered = filtered.filter(enrollment => 
+        new Date(enrollment.completionDate || enrollment.enrollmentDate) >= startDate
+      );
+    }
+    
+    if (endDate) {
+      const nextDay = new Date(endDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      filtered = filtered.filter(enrollment => 
+        new Date(enrollment.completionDate || enrollment.enrollmentDate) < nextDay
+      );
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.completionDate || a.enrollmentDate).getTime();
+      const dateB = new Date(b.completionDate || b.enrollmentDate).getTime();
+      
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+    
+    setFilteredEnrollments(filtered);
+  }, [searchTerm, statusFilter, sortOrder, startDate, endDate, enrollments]);
 
   // Generate enrollment certificate (mock)
   const generateCertificate = (enrollmentId: string) => {
     console.log(`Generating certificate for enrollment: ${enrollmentId}`);
     // In a real app, this would trigger a PDF generation or certificate download
     alert("Certificado generado correctamente. La descarga comenzará en unos segundos.");
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setSortOrder("newest");
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   return (
@@ -86,16 +146,127 @@ export default function History() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nombre de curso..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div className="mb-6 space-y-2">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre de curso..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              {showFilters ? "Ocultar filtros" : "Mostrar filtros"}
+            </Button>
+            
+            <Button 
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+            >
+              {sortOrder === "newest" ? (
+                <>
+                  <SortDesc className="h-4 w-4" />
+                  Más recientes
+                </>
+              ) : (
+                <>
+                  <SortAsc className="h-4 w-4" />
+                  Más antiguos
+                </>
+              )}
+            </Button>
           </div>
+          
+          {showFilters && (
+            <Card className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Estado del curso</Label>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filtrar por estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value={EnrollmentStatus.COMPLETED}>Completados</SelectItem>
+                      <SelectItem value={EnrollmentStatus.CANCELLED}>Cancelados</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Fecha de inicio</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        {startDate ? (
+                          format(startDate, "PPP", { locale: es })
+                        ) : (
+                          <span className="text-muted-foreground">Seleccionar fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={setStartDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Fecha de fin</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        {endDate ? (
+                          format(endDate, "PPP", { locale: es })
+                        ) : (
+                          <span className="text-muted-foreground">Seleccionar fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={setEndDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              
+              <Button 
+                variant="ghost" 
+                className="mt-4" 
+                onClick={resetFilters}
+              >
+                Resetear filtros
+              </Button>
+            </Card>
+          )}
         </div>
 
         {isLoading ? (
@@ -108,8 +279,19 @@ export default function History() {
               <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-xl font-medium mb-2">No hay cursos completados</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                Aún no has completado ningún curso. Cuando finalices un curso, aparecerá en tu historial.
+                {searchTerm || statusFilter !== "all" || startDate || endDate ? 
+                  "No se encontraron cursos que coincidan con los filtros seleccionados." : 
+                  "Aún no has completado ningún curso. Cuando finalices un curso, aparecerá en tu historial."}
               </p>
+              {(searchTerm || statusFilter !== "all" || startDate || endDate) && (
+                <Button 
+                  variant="outline" 
+                  className="mt-4" 
+                  onClick={resetFilters}
+                >
+                  Quitar filtros
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
