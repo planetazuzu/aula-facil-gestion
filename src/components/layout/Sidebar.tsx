@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
@@ -69,7 +70,7 @@ export function Sidebar({ className }: SidebarProps) {
           icon: BookText,
         },
         {
-          title: "Usuarios",
+          title: "Gestión de Usuarios",
           href: "/admin/users",
           icon: Users,
         },

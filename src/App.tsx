@@ -20,6 +20,7 @@ import Enrollments from "./pages/Enrollments";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
+import UsersAdmin from "./pages/admin/UsersAdmin"; // Add import for new UsersAdmin page
 import Notifications from "./pages/Notifications";
 import Ratings from "./pages/Ratings";
 import Statistics from "./pages/admin/Statistics";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/courses" element={<CoursesAdmin />} />
+            <Route path="/admin/users" element={<UsersAdmin />} /> {/* Add new route */}
             <Route path="/admin/statistics" element={<Statistics />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/messages" element={<Messages />} />
