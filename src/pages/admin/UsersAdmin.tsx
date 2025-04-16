@@ -72,7 +72,7 @@ export default function UsersAdmin() {
                   <SelectValue placeholder="Todos los roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los roles</SelectItem>
+                  <SelectItem value="all">Todos los roles</SelectItem>
                   <SelectItem value={UserRole.ADMIN}>Administrador</SelectItem>
                   <SelectItem value={UserRole.TEACHER}>Profesor</SelectItem>
                   <SelectItem value={UserRole.USER}>Usuario</SelectItem>
