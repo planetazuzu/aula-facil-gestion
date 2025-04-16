@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table";
 import { UserTableBody } from "./UserTableBody";
 import { UserTablePagination } from "./UserTablePagination";
+import { UserExportButton } from "./UserExportButton";
 
 interface UsersTableProps {
   users: User[];
@@ -28,6 +29,10 @@ export function UsersTable({
 }: UsersTableProps) {
   return (
     <div>
+      <div className="flex justify-end mb-2">
+        <UserExportButton users={users} />
+      </div>
+      
       <div className="rounded-md border">
         <Table>
           <TableHeader>
