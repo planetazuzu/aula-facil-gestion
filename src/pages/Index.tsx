@@ -3,7 +3,6 @@ import { Layout } from "@/components/layout/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { Book, GraduationCap, Users } from "lucide-react";
 
@@ -28,10 +27,10 @@ export default function Index() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Bienvenido a Aula Fácil
+                    Bienvenido a FORMACION EMPRESA
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Plataforma de gestión de cursos y formación. Encuentra los mejores cursos y administra tu aprendizaje.
+                    Plataforma de gestión de formación para empresas. Desarrolla el potencial de tu equipo.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -75,7 +74,7 @@ export default function Index() {
                   Características principales
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Descubre todas las funcionalidades que nuestra plataforma tiene para ofrecer.
+                  Soluciones de formación adaptadas a las necesidades de tu empresa.
                 </p>
               </div>
             </div>
@@ -84,27 +83,27 @@ export default function Index() {
                 <div className="flex justify-center mb-4">
                   <Book className="h-12 w-12 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold">Amplio catálogo de cursos</h3>
+                <h3 className="text-lg font-bold">Catálogo Empresarial</h3>
                 <p className="text-sm text-muted-foreground">
-                  Encuentra cursos de diversas temáticas y niveles para expandir tus conocimientos.
+                  Cursos especializados para el desarrollo profesional de tu equipo.
                 </p>
               </div>
               <div className="grid gap-1 text-center">
                 <div className="flex justify-center mb-4">
                   <GraduationCap className="h-12 w-12 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold">Seguimiento de aprendizaje</h3>
+                <h3 className="text-lg font-bold">Seguimiento de Progreso</h3>
                 <p className="text-sm text-muted-foreground">
-                  Gestiona tu progreso, inscripciones y mantén un historial de tus cursos completados.
+                  Monitorea el desarrollo y aprendizaje de tu personal.
                 </p>
               </div>
               <div className="grid gap-1 text-center">
                 <div className="flex justify-center mb-4">
                   <Users className="h-12 w-12 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold">Comunicación directa</h3>
+                <h3 className="text-lg font-bold">Gestión de Equipos</h3>
                 <p className="text-sm text-muted-foreground">
-                  Contacta directamente con profesores y administradores para resolver tus dudas.
+                  Herramientas para la comunicación y desarrollo corporativo.
                 </p>
               </div>
             </div>

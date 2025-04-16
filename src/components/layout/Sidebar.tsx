@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
@@ -33,9 +32,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   if (!user) return null;
 
-  // Define navigation items based on user role
   const navigationItems = (() => {
-    // Common items for all users
     const commonItems = [
       {
         title: "Inicio",
@@ -59,7 +56,6 @@ export function Sidebar({ className }: SidebarProps) {
       },
     ];
     
-    // Admin specific items
     if (isAdmin) {
       return [
         ...commonItems,
@@ -86,7 +82,6 @@ export function Sidebar({ className }: SidebarProps) {
       ];
     }
     
-    // Teacher specific items
     if (isTeacher) {
       return [
         ...commonItems,
@@ -103,7 +98,6 @@ export function Sidebar({ className }: SidebarProps) {
       ];
     }
     
-    // Regular user items
     return [
       ...commonItems,
       {
@@ -136,7 +130,7 @@ export function Sidebar({ className }: SidebarProps) {
         {!collapsed && (
           <div className="flex items-center">
             <BookOpen className="h-6 w-6 text-primary mr-2" />
-            <span className="font-semibold text-lg">Aula Fácil</span>
+            <span className="font-semibold text-lg">FORMACION EMPRESA</span>
           </div>
         )}
         {collapsed && <BookOpen className="h-6 w-6 text-primary mx-auto" />}

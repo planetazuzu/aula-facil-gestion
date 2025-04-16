@@ -1,73 +1,34 @@
-# Welcome to your Lovable project
 
-## Project info
+# FORMACION EMPRESA
 
-**URL**: https://lovable.dev/projects/1aa5f08d-37f4-45b0-b66b-0a926a093098
+Plataforma de gestión de formación empresarial.
 
-## How can I edit this code?
+## Descripción del Proyecto
 
-There are several ways of editing your application.
+FORMACION EMPRESA es una solución integral para el desarrollo profesional y la gestión de formación en entornos empresariales.
 
-**Use Lovable**
+## Características Principales
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1aa5f08d-37f4-45b0-b66b-0a926a093098) and start prompting.
+- Gestión de cursos empresariales
+- Seguimiento del progreso de aprendizaje
+- Herramientas de comunicación y desarrollo corporativo
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
+## Tecnologías Utilizadas
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase
 
-## How can I deploy this project?
+## Instalación y Configuración
 
-Simply open [Lovable](https://lovable.dev/projects/1aa5f08d-37f4-45b0-b66b-0a926a093098) and click on Share -> Publish.
+1. Clonar el repositorio
+2. Instalar dependencias: `npm install`
+3. Configurar variables de entorno
+4. Iniciar el servidor de desarrollo: `npm run dev`
 
-## Can I connect a custom domain to my Lovable project?
+## Despliegue
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Para desplegar FORMACION EMPRESA, consulte la documentación de despliegue.

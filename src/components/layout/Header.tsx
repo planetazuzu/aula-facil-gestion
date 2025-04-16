@@ -53,12 +53,12 @@ export function Header({ toggleSidebar }: HeaderProps) {
         <Button variant="ghost" size="icon" asChild>
           <Link to="/messages">
             <MessageCircle className="h-5 w-5" />
-            <span className="sr-only">Messages</span>
+            <span className="sr-only">Mensajes</span>
           </Link>
         </Button>
         <Button variant="ghost" size="icon">
           <Bell className="h-5 w-5" />
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">Notificaciones</span>
         </Button>
 
         <DropdownMenu>
@@ -74,7 +74,7 @@ export function Header({ toggleSidebar }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+            <DropdownMenuLabel>FORMACION EMPRESA</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/profile">Perfil</Link>
