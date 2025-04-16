@@ -1,15 +1,27 @@
-
 export enum UserRole {
   USER = "USER",
-  ADMIN = "ADMIN",
-  TEACHER = "TEACHER"
+  TEACHER = "TEACHER",
+  ADMIN = "ADMIN"
 }
 
 export enum NotificationPreference {
   EMAIL = "EMAIL",
   WHATSAPP = "WHATSAPP",
-  BOTH = "BOTH"
+  BOTH = "BOTH",
+  NONE = "NONE"
 }
+
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  phone?: string;
+  avatar?: string;
+  notificationPreference: NotificationPreference;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export enum CourseStatus {
   UPCOMING = "UPCOMING",
@@ -25,17 +37,6 @@ export enum EnrollmentStatus {
   CANCELLED = "CANCELLED"
 }
 
-export type User = {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  notificationPreference: NotificationPreference;
-  phone?: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type Course = {
   id: string;
   title: string;
@@ -47,11 +48,10 @@ export type Course = {
   capacity: number;
   enrolled: number;
   waitlist: number;
-  teacherId: string;
-  teacher?: User;
   status: CourseStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  instructor?: string;
+  imageUrl?: string;
+  averageRating?: number;
 };
 
 export type Enrollment = {
@@ -60,10 +60,23 @@ export type Enrollment = {
   courseId: string;
   status: EnrollmentStatus;
   enrollmentDate: Date;
-  rating?: number;
-  feedback?: string;
-  user?: User;
-  course?: Course;
+  completionDate?: Date;
+};
+
+export type CourseRating = {
+  id: string;
+  courseId: string;
+  userId: string;
+  rating: number;
+  comment: string;
+  createdAt: Date;
+};
+
+export type CourseFilter = {
+  topic?: string;
+  location?: string;
+  startDate?: string;
+  status?: CourseStatus;
 };
 
 export type Message = {
@@ -73,14 +86,4 @@ export type Message = {
   content: string;
   read: boolean;
   createdAt: Date;
-  sender?: User;
-  receiver?: User;
-};
-
-export type CourseFilter = {
-  topic?: string;
-  location?: string;
-  startDate?: Date;
-  endDate?: Date;
-  status?: CourseStatus;
 };

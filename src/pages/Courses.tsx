@@ -3,7 +3,7 @@ import { Layout } from "@/components/layout/Layout";
 import { useEffect, useState } from "react";
 import { mockService } from "@/lib/mockData";
 import { Course, CourseFilter, Enrollment, EnrollmentStatus } from "@/types";
-import { Search, BookText } from "lucide-react";
+import { Search, BookText, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
