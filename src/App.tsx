@@ -18,6 +18,7 @@ import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
 import Enrollments from "./pages/Enrollments";
 import NotFound from "./pages/NotFound";
+import CoursesAdmin from "./pages/admin/CoursesAdmin";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/waitlist" element={<WaitingList />} />
             <Route path="/enrollments" element={<Enrollments />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/courses" element={<CoursesAdmin />} />
             <Route path="/courses/:courseId/rate" element={<CourseRating />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/messages" element={<Messages />} />
