@@ -13,38 +13,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { TrashIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
-import { mockUsers } from "@/lib/mock";
+import { toast } from "sonner";
+import { userService } from "@/services/userService";
 
 interface UserDeleteDialogProps {
   userId: string;
   userName: string;
+  onSuccess: () => void;
 }
 
-export function UserDeleteDialog({ userId, userName }: UserDeleteDialogProps) {
+export function UserDeleteDialog({ userId, userName, onSuccess }: UserDeleteDialogProps) {
   const [open, setOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
-      // In a real app, we would make an API call to delete the user
-      const userIndex = mockUsers.findIndex(u => u.id === userId);
-      if (userIndex >= 0) {
-        mockUsers.splice(userIndex, 1);
-      }
+      setIsDeleting(true);
+      await userService.deleteUser(userId);
       
-      toast({
-        title: "Usuario eliminado",
-        description: `El usuario ${userName} ha sido eliminado con éxito.`,
-      });
+      toast.success(`El usuario ${userName} ha sido eliminado con éxito.`);
       
       setOpen(false);
+      onSuccess();
     } catch (error) {
       console.error("Error deleting user:", error);
-      toast({
-        title: "Error al eliminar usuario",
-        description: "Ha ocurrido un error al eliminar el usuario. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      });
+      toast.error("Ha ocurrido un error al eliminar el usuario. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsDeleting(false);
     }
   };
   
@@ -63,9 +58,13 @@ export function UserDeleteDialog({ userId, userName }: UserDeleteDialogProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-            Eliminar
+          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDelete} 
+            className="bg-destructive text-destructive-foreground"
+            disabled={isDeleting}
+          >
+            {isDeleting ? 'Eliminando...' : 'Eliminar'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

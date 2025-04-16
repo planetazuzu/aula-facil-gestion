@@ -23,8 +23,8 @@ import { PencilIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { NotificationPreference, User, UserRole } from "@/types";
-import { toast } from "@/hooks/use-toast";
-import { mockUsers } from "@/lib/mock";
+import { toast } from "sonner";
+import { userService } from "@/services/userService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UserFormValues {
@@ -37,11 +37,13 @@ interface UserFormValues {
 
 interface UserEditDialogProps {
   userId: string;
+  onSuccess: () => void;
 }
 
-export function UserEditDialog({ userId }: UserEditDialogProps) {
+export function UserEditDialog({ userId, onSuccess }: UserEditDialogProps) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<UserFormValues>({
     defaultValues: {
@@ -55,46 +57,48 @@ export function UserEditDialog({ userId }: UserEditDialogProps) {
 
   useEffect(() => {
     if (open) {
-      // In a real app, we would fetch the user data from an API
-      const foundUser = mockUsers.find(u => u.id === userId);
-      if (foundUser) {
-        setUser(foundUser);
-        form.reset({
-          name: foundUser.name,
-          email: foundUser.email,
-          role: foundUser.role,
-          notificationPreference: foundUser.notificationPreference,
-          phone: foundUser.phone || "",
-        });
-      }
+      // Fetch user data
+      const fetchUser = async () => {
+        setIsLoading(true);
+        try {
+          const user = await userService.getUserById(userId);
+          
+          if (user) {
+            form.reset({
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              notificationPreference: user.notificationPreference,
+              phone: user.phone || "",
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user:", error);
+          toast.error("Error al cargar los datos del usuario");
+          setOpen(false);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchUser();
     }
   }, [open, userId, form]);
 
-  const onSubmit = (data: UserFormValues) => {
+  const onSubmit = async (data: UserFormValues) => {
     try {
-      // In a real app, we would make an API call to update the user
-      const userIndex = mockUsers.findIndex(u => u.id === userId);
-      if (userIndex >= 0) {
-        mockUsers[userIndex] = {
-          ...mockUsers[userIndex],
-          ...data,
-          updatedAt: new Date(),
-        };
-      }
+      setIsSubmitting(true);
+      await userService.updateUser(userId, data);
       
-      toast({
-        title: "Usuario actualizado",
-        description: `El usuario ${data.name} ha sido actualizado con éxito.`,
-      });
+      toast.success(`El usuario ${data.name} ha sido actualizado con éxito.`);
       
       setOpen(false);
+      onSuccess();
     } catch (error) {
       console.error("Error updating user:", error);
-      toast({
-        title: "Error al actualizar usuario",
-        description: "Ha ocurrido un error al actualizar el usuario. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      });
+      toast.error("Ha ocurrido un error al actualizar el usuario. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -112,7 +116,11 @@ export function UserEditDialog({ userId }: UserEditDialogProps) {
             Actualiza la información del usuario.
           </DialogDescription>
         </DialogHeader>
-        {user && (
+        {isLoading ? (
+          <div className="flex justify-center items-center h-48">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
+        ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -208,7 +216,9 @@ export function UserEditDialog({ userId }: UserEditDialogProps) {
               />
               
               <DialogFooter>
-                <Button type="submit">Guardar Cambios</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+                </Button>
               </DialogFooter>
             </form>
           </Form>

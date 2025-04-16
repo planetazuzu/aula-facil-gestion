@@ -14,9 +14,10 @@ import { Button } from "@/components/ui/button";
 
 interface UserTableBodyProps {
   users: User[];
+  onRefresh: () => void;
 }
 
-export function UserTableBody({ users }: UserTableBodyProps) {
+export function UserTableBody({ users, onRefresh }: UserTableBodyProps) {
   return (
     <TableBody>
       {users.length > 0 ? (
@@ -35,9 +36,9 @@ export function UserTableBody({ users }: UserTableBodyProps) {
             <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-2">
-                <UserAuthDialog userId={user.id} />
-                <UserEditDialog userId={user.id} />
-                <UserDeleteDialog userId={user.id} userName={user.name} />
+                <UserAuthDialog userId={user.id} onSuccess={onRefresh} />
+                <UserEditDialog userId={user.id} onSuccess={onRefresh} />
+                <UserDeleteDialog userId={user.id} userName={user.name} onSuccess={onRefresh} />
               </div>
             </TableCell>
           </TableRow>

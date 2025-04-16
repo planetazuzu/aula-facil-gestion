@@ -18,6 +18,7 @@ interface UsersTableProps {
   onPageChange: (page: number) => void;
   totalItems: number;
   pageSize: number;
+  onRefresh: () => void;
 }
 
 export function UsersTable({ 
@@ -26,12 +27,13 @@ export function UsersTable({
   totalPages, 
   onPageChange,
   totalItems,
-  pageSize
+  pageSize,
+  onRefresh
 }: UsersTableProps) {
   return (
     <div>
       <div className="flex justify-between mb-2">
-        <UserCreateDialog />
+        <UserCreateDialog onSuccess={onRefresh} />
         <UserExportButton users={users} />
       </div>
       
@@ -47,7 +49,7 @@ export function UsersTable({
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
-          <UserTableBody users={users} />
+          <UserTableBody users={users} onRefresh={onRefresh} />
         </Table>
       </div>
       

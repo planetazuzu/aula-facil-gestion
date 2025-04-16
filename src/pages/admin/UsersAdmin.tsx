@@ -1,33 +1,53 @@
 
 import { Layout } from "@/components/layout/Layout";
 import { UserRole } from "@/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockUsers } from "@/lib/mock/users";
 import { UserFilters } from "@/components/admin/users/UserFilters";
 import { UsersTable } from "@/components/admin/users/UsersTable";
+import { userService } from "@/services/userService";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export default function UsersAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const [users, setUsers] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Calcula el total de páginas
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
-  
-  // Obtiene los usuarios para la página actual
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const result = await userService.getUsers({
+        page: currentPage,
+        pageSize,
+        searchTerm,
+        roleFilter,
+      });
+      
+      setUsers(result.users);
+      setTotalItems(result.totalCount);
+      setTotalPages(result.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      toast.error("Failed to load users");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage, pageSize, searchTerm, roleFilter]);
+
+  // Function to refresh data after CRUD operations
+  const refreshUsers = () => {
+    fetchUsers();
+  };
 
   return (
     <Layout requireAuth={true} allowedRoles={[UserRole.ADMIN]}>
@@ -48,14 +68,23 @@ export default function UsersAdmin() {
               setPageSize={setPageSize}
             />
             
-            <UsersTable 
-              users={paginatedUsers} 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              totalItems={filteredUsers.length}
-              pageSize={pageSize}
-            />
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : (
+              <UsersTable 
+                users={users} 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={totalItems}
+                pageSize={pageSize}
+                onRefresh={refreshUsers}
+              />
+            )}
           </CardContent>
         </Card>
       </div>

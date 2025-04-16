@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,8 +22,8 @@ import { UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NotificationPreference, UserRole } from "@/types";
-import { toast } from "@/hooks/use-toast";
-import { mockUsers } from "@/lib/mock";
+import { toast } from "sonner";
+import { userService } from "@/services/userService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UserFormValues {
@@ -35,8 +34,13 @@ interface UserFormValues {
   phone?: string;
 }
 
-export function UserCreateDialog() {
+interface UserCreateDialogProps {
+  onSuccess: () => void;
+}
+
+export function UserCreateDialog({ onSuccess }: UserCreateDialogProps) {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<UserFormValues>({
     defaultValues: {
@@ -48,33 +52,21 @@ export function UserCreateDialog() {
     },
   });
 
-  const onSubmit = (data: UserFormValues) => {
+  const onSubmit = async (data: UserFormValues) => {
     try {
-      // In a real app, we would make an API call to create the user
-      // For now, we'll just add to the mockUsers array
-      const newUser = {
-        id: `${mockUsers.length + 1}`,
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      setIsSubmitting(true);
+      await userService.createUser(data);
       
-      mockUsers.push(newUser);
-      
-      toast({
-        title: "Usuario creado",
-        description: `El usuario ${data.name} ha sido creado con éxito.`,
-      });
+      toast.success(`El usuario ${data.name} ha sido creado con éxito.`);
       
       form.reset();
       setOpen(false);
+      onSuccess();
     } catch (error) {
       console.error("Error creating user:", error);
-      toast({
-        title: "Error al crear usuario",
-        description: "Ha ocurrido un error al crear el usuario. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      });
+      toast.error("Ha ocurrido un error al crear el usuario. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -188,7 +180,9 @@ export function UserCreateDialog() {
             />
             
             <DialogFooter>
-              <Button type="submit">Crear Usuario</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Creando...' : 'Crear Usuario'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

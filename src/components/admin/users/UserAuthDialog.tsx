@@ -1,98 +1,85 @@
 
-import { useState } from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Shield, UserCheck } from "lucide-react";
+import { KeyIcon } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { userService } from "@/services/userService";
 
-// Define the schema for user authentication
-const authUserSchema = z.object({
-  userId: z.string().min(1, "Se requiere ID de usuario"),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres")
-});
-
-type AuthUserFormValues = z.infer<typeof authUserSchema>;
+interface PasswordFormValues {
+  password: string;
+  confirmPassword: string;
+}
 
 interface UserAuthDialogProps {
   userId: string;
+  onSuccess?: () => void;
 }
 
-export function UserAuthDialog({ userId }: UserAuthDialogProps) {
-  const { toast } = useToast();
+export function UserAuthDialog({ userId, onSuccess }: UserAuthDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Form hook for user authentication
-  const form = useForm<AuthUserFormValues>({
-    resolver: zodResolver(authUserSchema),
+  const form = useForm<PasswordFormValues>({
     defaultValues: {
-      userId: userId,
-      password: ""
-    }
+      password: "",
+      confirmPassword: "",
+    },
   });
-  
-  // Function to submit authentication form
-  const onSubmit = (values: AuthUserFormValues) => {
-    console.log("Authenticating user:", values);
-    
-    // In a real application, this would call an API endpoint to authenticate the user
-    // For this mock implementation, we'll just show a success toast
-    
-    toast({
-      title: "Usuario autenticado",
-      description: "El usuario ha sido autenticado correctamente",
-      variant: "default",
-    });
-    
-    form.reset({ userId: userId, password: "" });
-  };
 
+  const onSubmit = async (data: PasswordFormValues) => {
+    if (data.password !== data.confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      await userService.resetUserPassword(userId, data.password);
+      
+      toast.success("Contraseña actualizada con éxito");
+      
+      form.reset();
+      setOpen(false);
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast.error("Error al actualizar la contraseña");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
-        >
-          <UserCheck className="h-4 w-4 mr-1" />
-          Autenticar
+        <Button variant="ghost" size="icon">
+          <KeyIcon className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Autenticar Usuario</DialogTitle>
+          <DialogTitle>Resetear Contraseña</DialogTitle>
           <DialogDescription>
-            Establece una contraseña para autenticar al usuario seleccionado.
+            Ingresa la nueva contraseña para el usuario.
           </DialogDescription>
         </DialogHeader>
-        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="userId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ID de Usuario</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
             <FormField
               control={form.control}
               name="password"
@@ -100,11 +87,21 @@ export function UserAuthDialog({ userId }: UserAuthDialogProps) {
                 <FormItem>
                   <FormLabel>Nueva Contraseña</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="Ingresa la nueva contraseña" 
-                      {...field} 
-                    />
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar Contraseña</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,9 +109,8 @@ export function UserAuthDialog({ userId }: UserAuthDialogProps) {
             />
             
             <DialogFooter>
-              <Button type="submit">
-                <Shield className="h-4 w-4 mr-2" />
-                Autenticar Usuario
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Actualizando...' : 'Guardar Contraseña'}
               </Button>
             </DialogFooter>
           </form>
