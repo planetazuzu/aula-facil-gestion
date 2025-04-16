@@ -1,4 +1,53 @@
-import { Course, Enrollment, Message, User, UserRole, CourseStatus, EnrollmentStatus, NotificationPreference } from "@/types";
+import { User, UserRole, NotificationPreference, Message } from "@/types";
+import { mockUsers } from "./mockData"; // Self-referencing to avoid circular import
+import { Course, Enrollment, CourseStatus, EnrollmentStatus } from "@/types";
+
+type LoginResult = {
+  success: boolean;
+  user?: User;
+  message?: string;
+};
+
+export const mockService = {
+  login: (email: string, password: string): Promise<LoginResult> => {
+    return new Promise((resolve) => {
+      const user = mockUsers.find(u => u.email === email);
+      
+      if (user && password === 'password') {
+        resolve({
+          success: true,
+          user: user,
+        });
+      } else {
+        resolve({
+          success: false,
+          message: 'Credenciales incorrectas'
+        });
+      }
+    });
+  },
+
+  // Otros métodos mock que podrías necesitar
+  getUserById: (id: string): User | undefined => {
+    return mockUsers.find(u => u.id === id);
+  },
+
+  // Método mock para crear mensajes
+  createMessage: (senderId: string, receiverId: string, content: string): Message => {
+    const newMessage: Message = {
+      id: String(mockUsers.length + 1),
+      senderId,
+      receiverId,
+      content,
+      read: false,
+      createdAt: new Date(),
+    };
+
+    // En un escenario real, esto se manejaría en el backend
+    mockMessages.push(newMessage);
+    return newMessage;
+  },
+};
 
 export const mockUsers: User[] = [
   {
