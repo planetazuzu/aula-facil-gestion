@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/layout/Layout";
-import { BookOpen, Lock, Mail } from "lucide-react";
+import { BookOpen, Lock, Mail, AlertCircle } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const formSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 export default function Login() {
   const { login, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,7 +40,14 @@ export default function Login() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
-      await login(values.email, values.password);
+      setError(null);
+      const success = await login(values.email, values.password);
+      if (!success) {
+        setError("Las credenciales ingresadas son incorrectas. Por favor, revisa los datos de ejemplo abajo.");
+      }
+    } catch (err) {
+      setError("Ha ocurrido un error durante el inicio de sesión. Inténtalo de nuevo.");
+      console.error("Login error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -62,6 +71,13 @@ export default function Login() {
               Inicia sesión para acceder a tu cuenta
             </p>
           </div>
+
+          {error && (
+            <Alert variant="destructive" className="my-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -132,30 +148,31 @@ export default function Login() {
           </div>
 
           <div className="mt-8 border-t pt-6">
-            <p className="text-center text-xs text-muted-foreground">
-              Puedes usar estas credenciales de demostración:
+            <p className="text-center text-xs font-semibold text-muted-foreground">
+              Credenciales de demostración
             </p>
             <div className="mt-2 space-y-2 text-xs">
               <div className="flex items-center justify-between rounded border p-2">
-                <span>Administrador</span>
+                <span className="font-medium">Administrador</span>
                 <code className="rounded bg-muted px-1 py-0.5">
-                  admin@aulafacil.com
+                  admin@example.com
                 </code>
               </div>
               <div className="flex items-center justify-between rounded border p-2">
-                <span>Profesor</span>
+                <span className="font-medium">Profesor</span>
                 <code className="rounded bg-muted px-1 py-0.5">
-                  profesor@aulafacil.com
+                  teacher@example.com
                 </code>
               </div>
               <div className="flex items-center justify-between rounded border p-2">
-                <span>Usuario</span>
+                <span className="font-medium">Usuario</span>
                 <code className="rounded bg-muted px-1 py-0.5">
-                  usuario@ejemplo.com
+                  student@example.com
                 </code>
               </div>
               <p className="mt-2 text-center">
-                <span>(Contraseña: cualquier texto con 6+ caracteres)</span>
+                <span>Contraseña para todos: </span>
+                <code className="rounded bg-muted px-1 py-0.5">password</code>
               </p>
             </div>
           </div>
