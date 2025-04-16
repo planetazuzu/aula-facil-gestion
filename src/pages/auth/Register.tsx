@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/layout/Layout";
-import { BookOpen, Lock, Mail, Phone, User } from "lucide-react";
+import { AlertCircle, BookOpen, Lock, Mail, Phone, User } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
@@ -25,7 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NotificationPreference } from "@/types";
+import { NotificationPreference, UserRole } from "@/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { mockUsers } from "@/lib/mock";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -58,9 +60,10 @@ const formSchema = z.object({
 );
 
 export default function Register() {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,17 +77,45 @@ export default function Register() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      
+      // Check if email already exists
+      const emailExists = mockUsers.some(u => u.email === values.email);
+      if (emailExists) {
+        setError("Este correo electrónico ya está registrado.");
+        return;
+      }
+      
+      // Add new user to mockUsers with a unique ID
+      const newUserId = String(mockUsers.length + 1);
+      mockUsers.push({
+        id: newUserId,
+        email: values.email,
+        name: values.name,
+        role: UserRole.USER, // Default role is USER
+        notificationPreference: values.notificationPreference,
+        phone: values.phone,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      
       toast({
         title: "Registro exitoso",
-        description: "Se ha enviado un correo de confirmación a tu email",
+        description: "Tu cuenta ha sido creada correctamente. Iniciando sesión...",
       });
-    }, 1500);
+      
+      // Login the user automatically
+      await login(values.email, values.password);
+      
+    } catch (err) {
+      console.error("Register error:", err);
+      setError("Ha ocurrido un error durante el registro. Inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Redirect if already logged in
@@ -109,6 +140,13 @@ export default function Register() {
               Regístrate para acceder a todos nuestros cursos
             </p>
           </div>
+
+          {error && (
+            <Alert variant="destructive" className="my-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

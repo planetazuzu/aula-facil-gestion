@@ -17,24 +17,39 @@ export default function Index() {
           Plataforma de gestión de formación para empresas. Desarrolla el potencial de tu equipo.
         </p>
         
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-col md:flex-row justify-center gap-4">
           {user ? (
-            <Link to="/courses">
-              <Button size="lg">Explorar cursos</Button>
-            </Link>
+            <>
+              <Link to="/courses">
+                <Button size="lg" className="w-full md:w-auto">Explorar cursos</Button>
+              </Link>
+              <Link to="/enrollments">
+                <Button size="lg" variant="outline" className="w-full md:w-auto">Mis inscripciones</Button>
+              </Link>
+            </>
           ) : (
             <>
               <Link to="/login">
-                <Button size="lg">Iniciar sesión</Button>
+                <Button size="lg" className="w-full md:w-auto">Iniciar sesión</Button>
               </Link>
               <Link to="/register">
-                <Button size="lg" variant="outline">
-                  Registrarse
+                <Button size="lg" variant="outline" className="w-full md:w-auto">
+                  Registrarse ahora
                 </Button>
               </Link>
             </>
           )}
         </div>
+        
+        {!user && (
+          <div className="mt-8 p-4 bg-muted rounded-lg max-w-md mx-auto">
+            <h2 className="font-medium mb-2">¿Nuevo en la plataforma?</h2>
+            <p className="text-sm mb-4">Regístrate para acceder a todos los cursos y comenzar tu formación profesional.</p>
+            <Link to="/register">
+              <Button variant="secondary" className="w-full">Crear cuenta gratis</Button>
+            </Link>
+          </div>
+        )}
       </div>
     </Layout>
   );
