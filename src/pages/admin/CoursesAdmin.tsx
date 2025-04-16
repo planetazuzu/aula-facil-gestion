@@ -4,6 +4,8 @@ import { Layout } from "@/components/layout/Layout";
 import { UserRole, Course, CourseStatus } from "@/types";
 import { mockService, mockCourses } from "@/lib/mock";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button"; // Added Button import
+import { Plus } from "lucide-react"; // Added Plus icon import
 
 // Import our new components
 import { CourseSearch } from "@/components/admin/courses/CourseSearch";
