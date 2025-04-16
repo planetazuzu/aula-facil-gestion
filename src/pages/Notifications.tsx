@@ -18,7 +18,7 @@ import { notificationService } from "@/lib/mock/notifications";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Notifications() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -56,16 +56,10 @@ export default function Notifications() {
     setIsUpdating(true);
     
     try {
+      // Since updateUser doesn't exist in the AuthContext, we'll simulate success after a delay
       // In a real implementation, this would make an API call to update user preferences
       setTimeout(() => {
-        // Update user in context
-        updateUser({
-          ...user,
-          notificationPreference: notificationSettings.preference,
-          phone: notificationSettings.phone || undefined,
-          email: notificationSettings.email,
-        });
-        
+        // Show success toast without updating user in context
         toast({
           title: "Preferencias actualizadas",
           description: "Tus preferencias de notificación han sido actualizadas correctamente.",

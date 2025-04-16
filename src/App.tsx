@@ -17,6 +17,7 @@ import CourseRating from "./pages/CourseRating";
 import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
 import Enrollments from "./pages/Enrollments";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import CoursesAdmin from "./pages/admin/CoursesAdmin";
 import Notifications from "./pages/Notifications";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/courses" element={<Courses />} />
             <Route path="/waitlist" element={<WaitingList />} />
             <Route path="/enrollments" element={<Enrollments />} />
+            <Route path="/history" element={<History />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/courses" element={<CoursesAdmin />} />
             <Route path="/courses/:courseId/rate" element={<CourseRating />} />
