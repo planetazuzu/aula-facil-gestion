@@ -1,10 +1,17 @@
 
 // This file is maintained for backward compatibility
 // Please use the more modular imports from @/lib/mock instead
-import { mockService, mockUsers, mockCourses, mockEnrollments, mockRatings, mockMessages } from "./mock";
+import { mockService } from "./mock";
+import { userService } from "./mock/users";
+import { mockUsers } from "./mock/users";
+import { mockCourses } from "./mock/courses";
+import { mockEnrollments } from "./mock/enrollments";
+import { mockRatings } from "./mock/ratings";
+import { mockMessages } from "./mock/messages";
 
 export { 
   mockService, 
+  userService, // Export userService directly
   mockUsers, 
   mockCourses, 
   mockEnrollments, 

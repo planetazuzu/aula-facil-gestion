@@ -1,8 +1,9 @@
 
 import { User, UserRole } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
-import { mockService } from "@/lib/mockData";
 import { useToast } from "@/components/ui/use-toast";
+// Import the userService directly to avoid any mock service confusion
+import { userService } from "@/lib/mock/users";
 // Importamos los servicios de Supabase, pero mantenemos compatibilidad con el servicio mock
 import { supabaseService } from "@/lib/supabase";
 
@@ -135,8 +136,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return false;
         }
       } else {
-        // Lógica existente para el servicio mock
-        const result = await mockService.login(email, password);
+        // Usar directamente userService en lugar de mockService
+        const result = await userService.login(email, password);
         if (result.success && result.user) {
           setUser(result.user);
           localStorage.setItem("user", JSON.stringify(result.user));

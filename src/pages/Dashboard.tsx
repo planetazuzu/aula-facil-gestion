@@ -2,13 +2,13 @@
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen, CalendarDays, Award } from "lucide-react";
-import { mockService } from "@/lib/mock"; // Updated import
+import { userService } from "@/lib/mock/users"; // Updated direct import
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const userCount = mockService.getTotalUserCount();
+  const userCount = userService.getTotalUserCount();
   const courseCount = 0; // No hay cursos en el sistema actualmente
 
   return (
