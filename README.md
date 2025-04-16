@@ -1,11 +1,11 @@
 
-# FORMACION EMPRESA
+# Empresa Formacion
 
 Plataforma de gestión de formación empresarial.
 
 ## Descripción del Proyecto
 
-FORMACION EMPRESA es una solución integral para el desarrollo profesional y la gestión de formación en entornos empresariales.
+Empresa Formacion es una solución integral para el desarrollo profesional y la gestión de formación en entornos empresariales.
 
 ## Características Principales
 
@@ -31,4 +31,4 @@ FORMACION EMPRESA es una solución integral para el desarrollo profesional y la 
 
 ## Despliegue
 
-Para desplegar FORMACION EMPRESA, consulte la documentación de despliegue.
+Para desplegar Empresa Formacion, consulte la documentación de despliegue.

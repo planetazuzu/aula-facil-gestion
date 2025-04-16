@@ -1,4 +1,3 @@
-
 import { Bell, Menu, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -76,7 +75,7 @@ export function Header({ toggleSidebar }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>FORMACION EMPRESA</DropdownMenuLabel>
+            <DropdownMenuLabel>Empresa Formacion</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/profile">Perfil</Link>

@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/layout/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ export default function Index() {
     <Layout requireAuth={false}>
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none mb-4">
-          Bienvenido a FORMACION EMPRESA
+          Bienvenido a Empresa Formacion
         </h1>
         <p className="max-w-[600px] text-muted-foreground md:text-xl mx-auto mb-6">
           Plataforma de gestión de formación para empresas. Desarrolla el potencial de tu equipo.
