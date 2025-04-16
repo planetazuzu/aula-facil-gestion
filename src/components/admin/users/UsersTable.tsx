@@ -1,4 +1,3 @@
-
 import { User, UserRole } from "@/types";
 import { 
   Table, 
@@ -52,34 +51,28 @@ export function UsersTable({
     }
   };
 
-  // Determina qué números de página mostrar
   const getPageNumbers = () => {
     const pages = [];
     const maxPagesToShow = 5;
     
     if (totalPages <= maxPagesToShow) {
-      // Si hay pocas páginas, muestra todas
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Siempre incluye la primera página
       pages.push(1);
       
-      // Para páginas intermedias
       let startPage = Math.max(2, currentPage - 1);
       let endPage = Math.min(currentPage + 1, totalPages - 1);
       
-      // Ajusta para mostrar siempre 3 páginas en el medio
-      if (startPage > 2) pages.push(null); // Añade elipsis
+      if (startPage > 2) pages.push(null);
       
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
       
-      if (endPage < totalPages - 1) pages.push(null); // Añade elipsis
+      if (endPage < totalPages - 1) pages.push(null);
       
-      // Siempre incluye la última página
       pages.push(totalPages);
     }
     
@@ -147,8 +140,7 @@ export function UsersTable({
             <PaginationItem>
               <PaginationLink 
                 onClick={() => onPageChange(1)} 
-                disabled={currentPage === 1}
-                className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                className={currentPage === 1 ? "opacity-50 pointer-events-none" : "cursor-pointer"}
               >
                 <ChevronsLeft className="h-4 w-4 mr-1" />
                 Inicio
@@ -158,8 +150,7 @@ export function UsersTable({
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => onPageChange(currentPage - 1)} 
-                disabled={currentPage === 1}
-                className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                className={currentPage === 1 ? "opacity-50 pointer-events-none" : "cursor-pointer"}
               />
             </PaginationItem>
             
@@ -184,16 +175,14 @@ export function UsersTable({
             <PaginationItem>
               <PaginationNext 
                 onClick={() => onPageChange(currentPage + 1)} 
-                disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                className={currentPage === totalPages ? "opacity-50 pointer-events-none" : "cursor-pointer"}
               />
             </PaginationItem>
             
             <PaginationItem>
               <PaginationLink 
                 onClick={() => onPageChange(totalPages)} 
-                disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                className={currentPage === totalPages ? "opacity-50 pointer-events-none" : "cursor-pointer"}
               >
                 Final
                 <ChevronsRight className="h-4 w-4 ml-1" />
