@@ -12,7 +12,30 @@ interface AuthContextType {
   isAdmin: boolean;
   isTeacher: boolean;
   isUser: boolean;
+  hasPermission: (permission: string) => boolean;
+  checkPermissions: (permissions: string[]) => boolean;
 }
+
+// Define permissions for each role
+const rolePermissions: Record<UserRole, string[]> = {
+  [UserRole.ADMIN]: [
+    'user:create', 'user:read', 'user:update', 'user:delete',
+    'course:create', 'course:read', 'course:update', 'course:delete',
+    'enrollment:create', 'enrollment:read', 'enrollment:update', 'enrollment:delete',
+    'statistics:read', 'system:manage'
+  ],
+  [UserRole.TEACHER]: [
+    'course:read', 'course:update',
+    'enrollment:read',
+    'user:read',
+    'statistics:read'
+  ],
+  [UserRole.USER]: [
+    'course:read',
+    'enrollment:create', 'enrollment:read', 'enrollment:update',
+    'user:read'
+  ]
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -158,9 +181,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Role-based checks
   const isAdmin = user?.role === UserRole.ADMIN;
   const isTeacher = user?.role === UserRole.TEACHER;
   const isUser = user?.role === UserRole.USER;
+
+  // Permission-based checks
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    
+    const userPermissions = rolePermissions[user.role] || [];
+    return userPermissions.includes(permission);
+  };
+
+  // Check if user has any of the provided permissions
+  const checkPermissions = (permissions: string[]): boolean => {
+    if (!user) return false;
+    if (permissions.length === 0) return true;
+    
+    const userPermissions = rolePermissions[user.role] || [];
+    return permissions.some(permission => userPermissions.includes(permission));
+  };
 
   return (
     <AuthContext.Provider
@@ -172,6 +213,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isAdmin,
         isTeacher,
         isUser,
+        hasPermission,
+        checkPermissions,
       }}
     >
       {children}

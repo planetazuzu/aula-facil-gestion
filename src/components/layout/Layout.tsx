@@ -9,10 +9,16 @@ interface LayoutProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   allowedRoles?: string[];
+  requiredPermissions?: string[];
 }
 
-export function Layout({ children, requireAuth = true, allowedRoles = [] }: LayoutProps) {
-  const { user, isLoading } = useAuth();
+export function Layout({ 
+  children, 
+  requireAuth = true, 
+  allowedRoles = [],
+  requiredPermissions = []
+}: LayoutProps) {
+  const { user, isLoading, checkPermissions } = useAuth();
 
   if (isLoading) {
     return (
@@ -28,6 +34,11 @@ export function Layout({ children, requireAuth = true, allowedRoles = [] }: Layo
   }
 
   // Check if user has permission to access this page
+  if (user && requiredPermissions.length > 0 && !checkPermissions(requiredPermissions)) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Check if user has role to access this page
   if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }

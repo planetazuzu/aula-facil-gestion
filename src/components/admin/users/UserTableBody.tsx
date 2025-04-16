@@ -10,6 +10,7 @@ import { UserAuthDialog } from "./UserAuthDialog";
 import { getUserRoleBadgeVariant, getUserRoleName, getNotificationPreferenceText } from "./userTableUtils";
 import { UserEditDialog } from "./UserEditDialog";
 import { UserDeleteDialog } from "./UserDeleteDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UserTableBodyProps {
   users: User[];
@@ -17,6 +18,8 @@ interface UserTableBodyProps {
 }
 
 export function UserTableBody({ users, onRefresh }: UserTableBodyProps) {
+  const { hasPermission } = useAuth();
+  
   return (
     <TableBody>
       {users.length > 0 ? (
@@ -35,9 +38,15 @@ export function UserTableBody({ users, onRefresh }: UserTableBodyProps) {
             <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-2">
-                <UserAuthDialog userId={user.id} onSuccess={onRefresh} />
-                <UserEditDialog userId={user.id} onSuccess={onRefresh} />
-                <UserDeleteDialog userId={user.id} userName={user.name} onSuccess={onRefresh} />
+                {hasPermission('user:update') && (
+                  <UserAuthDialog userId={user.id} onSuccess={onRefresh} />
+                )}
+                {hasPermission('user:update') && (
+                  <UserEditDialog userId={user.id} onSuccess={onRefresh} />
+                )}
+                {hasPermission('user:delete') && (
+                  <UserDeleteDialog userId={user.id} userName={user.name} onSuccess={onRefresh} />
+                )}
               </div>
             </TableCell>
           </TableRow>

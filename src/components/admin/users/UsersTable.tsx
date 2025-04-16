@@ -10,6 +10,7 @@ import { UserTableBody } from "./UserTableBody";
 import { UserTablePagination } from "./UserTablePagination";
 import { UserExportButton } from "./UserExportButton";
 import { UserCreateDialog } from "./UserCreateDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UsersTableProps {
   users: User[];
@@ -30,11 +31,17 @@ export function UsersTable({
   pageSize,
   onRefresh
 }: UsersTableProps) {
+  const { hasPermission } = useAuth();
+  
   return (
     <div>
       <div className="flex justify-between mb-2">
-        <UserCreateDialog onSuccess={onRefresh} />
-        <UserExportButton users={users} />
+        {hasPermission('user:create') && (
+          <UserCreateDialog onSuccess={onRefresh} />
+        )}
+        {hasPermission('user:read') && (
+          <UserExportButton users={users} />
+        )}
       </div>
       
       <div className="rounded-md border">
