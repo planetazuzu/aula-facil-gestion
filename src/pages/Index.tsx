@@ -2,6 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { PushNotificationDemo } from "@/components/PushNotificationDemo";
 
 export default function Index() {
   const { user } = useAuth();
@@ -47,6 +48,12 @@ export default function Index() {
             <Link to="/register">
               <Button variant="secondary" className="w-full">Crear cuenta gratis</Button>
             </Link>
+          </div>
+        )}
+        
+        {user && (
+          <div className="mt-8 max-w-md mx-auto">
+            <PushNotificationDemo />
           </div>
         )}
       </div>
