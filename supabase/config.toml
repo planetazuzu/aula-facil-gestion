@@ -1,5 +1,5 @@
 
 project_id = "nxuzeedgbpzurfxjvmgh"
 
-[functions.notifications]
+[functions.push-notifications]
 verify_jwt = true
