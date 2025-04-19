@@ -1,9 +1,13 @@
 
 import { Button } from "@/components/ui/button";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { Bell, BellOff } from "lucide-react";
+import { Bell, BellOff, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const PushNotificationDemo = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const { isSupported, isSubscribed, subscribe, unsubscribe } = usePushNotifications();
 
   if (!isSupported) {
@@ -16,6 +20,19 @@ export const PushNotificationDemo = () => {
     );
   }
 
+  const handleSubscriptionChange = async () => {
+    setIsLoading(true);
+    try {
+      if (isSubscribed) {
+        await unsubscribe();
+      } else {
+        await subscribe();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Notificaciones Push</h2>
@@ -26,10 +43,16 @@ export const PushNotificationDemo = () => {
       </p>
       
       <Button
-        onClick={isSubscribed ? unsubscribe : subscribe}
+        onClick={handleSubscriptionChange}
         variant={isSubscribed ? "outline" : "default"}
+        disabled={isLoading}
       >
-        {isSubscribed ? (
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Procesando...
+          </>
+        ) : isSubscribed ? (
           <>
             <BellOff className="mr-2" />
             Desactivar notificaciones

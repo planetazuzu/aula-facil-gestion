@@ -7,11 +7,32 @@ export function usePushNotifications() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
+  // Obtenemos la clave VAPID pública de la API de Supabase
+  const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
+  
   useEffect(() => {
+    // Verificamos si el navegador soporta notificaciones push
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       registerServiceWorker();
+      fetchVapidPublicKey();
     }
   }, []);
+
+  // Función para obtener la clave VAPID pública de Supabase
+  const fetchVapidPublicKey = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('push-notifications', {
+        method: 'GET',
+      });
+      
+      if (error) throw error;
+      if (data && data.vapidPublicKey) {
+        setVapidPublicKey(data.vapidPublicKey);
+      }
+    } catch (error) {
+      console.error('Error al obtener la clave VAPID:', error);
+    }
+  };
 
   const registerServiceWorker = async () => {
     try {
@@ -23,26 +44,30 @@ export function usePushNotifications() {
         setSubscription(existingSubscription);
       }
     } catch (error) {
-      console.error('Service Worker registration failed:', error);
+      console.error('Error al registrar el Service Worker:', error);
     }
   };
 
   const subscribeToNotifications = async () => {
     try {
       if (!registration) {
-        throw new Error('Service Worker not registered');
+        throw new Error('Service Worker no registrado');
+      }
+      
+      if (!vapidPublicKey) {
+        throw new Error('Clave VAPID pública no disponible');
       }
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY'
+        applicationServerKey: vapidPublicKey
       });
 
       setSubscription(subscription);
 
-      // Store the subscription in your backend
+      // Guardamos la suscripción en el backend
       const { error } = await supabase.functions.invoke('push-notifications', {
-        body: { subscription }
+        body: { subscription, action: 'subscribe' }
       });
 
       if (error) throw error;
@@ -53,7 +78,7 @@ export function usePushNotifications() {
       });
 
     } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
+      console.error('Error al suscribirse a notificaciones push:', error);
       toast({
         title: "Error",
         description: "No se pudieron activar las notificaciones push. Por favor, inténtalo de nuevo.",
@@ -65,6 +90,11 @@ export function usePushNotifications() {
   const unsubscribeFromNotifications = async () => {
     try {
       if (subscription) {
+        // Notificamos al backend que el usuario se ha desuscrito
+        await supabase.functions.invoke('push-notifications', {
+          body: { subscription, action: 'unsubscribe' }
+        });
+        
         await subscription.unsubscribe();
         setSubscription(null);
         
@@ -74,7 +104,7 @@ export function usePushNotifications() {
         });
       }
     } catch (error) {
-      console.error('Failed to unsubscribe from push notifications:', error);
+      console.error('Error al desuscribirse de notificaciones push:', error);
       toast({
         title: "Error",
         description: "No se pudieron desactivar las notificaciones push. Por favor, inténtalo de nuevo.",
